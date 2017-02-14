@@ -9,5 +9,5 @@ package com.example.retrofit.network;
  * Description:
  */
 
-public class NetworkClient {
+public class NetClient {
 }
