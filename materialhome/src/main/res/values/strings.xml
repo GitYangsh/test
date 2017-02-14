@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">MaterialHome</string>
+
+    <!-- Main Navigation -->
+    <string name="nav_author">Hymane</string>
+    <string name="nav_author_url">https://github.com/hymanme</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_e_book">EBook</string>
+    <string name="nav_bookshelf">Bookshelf</string>
+    <string name="nav_tools">Tools</string>
+    <string name="nav_communicate">Communicate</string>
+    <string name="nav_theme">Theme</string>
+    <string name="nav_send">Send</string>
+
+</resources>

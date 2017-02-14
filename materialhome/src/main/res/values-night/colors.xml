@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--navigation header-->
+    <color name="startColor">#6a6b6a</color>
+    <color name="centerColor">#3c5c3d</color>
+    <color name="endColor">#203b21</color>
+
+</resources>

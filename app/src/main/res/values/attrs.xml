@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--<declare-styleable name="Theme">
+        <attr name="customProgressBar" format="reference"/>
+    </declare-styleable>
+    -->
+    <declare-styleable name="CustomProgressBar">
+        <attr name="max" format="integer"/>
+        <attr name="progress" format="integer"/>
+
+        <attr name="reachedBarColor" format="color"/>
+        <attr name="unreachedBarColor" format="color"/>
+
+        <attr name="reachedBarHeight" format="dimension"/>
+        <attr name="unreachedBarHeight" format="dimension"/>
+    </declare-styleable>
+</resources>
