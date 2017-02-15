@@ -3,6 +3,7 @@ package com.example.retrofit.util;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * 类说明：
@@ -18,7 +19,7 @@ public class DateUtil {
     private static final ThreadLocal<DateFormat> df = new ThreadLocal<DateFormat>() {
         @Override
         protected DateFormat initialValue() {
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS", Locale.CHINA);
         }
     };
 

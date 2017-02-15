@@ -1,5 +1,7 @@
 package com.example.retrofit.network;
 
+import com.example.retrofit.util.LogUtil;
+
 import java.io.IOException;
 
 import okhttp3.HttpUrl;
@@ -17,6 +19,7 @@ import okhttp3.Response;
  */
 
 public class BaseParamsInterceptor implements Interceptor {
+    private static final String TAG = Interceptor.class.getSimpleName();
 
     @Override
     public Response intercept(Chain chain) throws IOException {
@@ -25,9 +28,13 @@ public class BaseParamsInterceptor implements Interceptor {
 
 //        originalHttpUrl.newBuilder().
         HttpUrl httpUrl = originalHttpUrl.newBuilder()
-                .addQueryParameter("key1", "value1").build();
+                //.addQueryParameter("key1", "value1")
+                .build();
         Request request = originalRequest.newBuilder()
                 .url(httpUrl).build();
+
+        LogUtil.i(TAG, "Old HttpUrl:" + originalHttpUrl.toString());
+        LogUtil.i(TAG, "New HttpUrl:" + httpUrl.toString());
 
         return chain.proceed(request);
     }

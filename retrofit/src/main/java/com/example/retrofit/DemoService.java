@@ -20,6 +20,15 @@ import retrofit2.http.QueryMap;
  */
 
 public interface DemoService {
+    String API_DISCOVERY = "discovery";
+    String API_APP = "app";
+
+    @GET(API_DISCOVERY)
+    Call<String> discovery(@QueryMap Map<String, String> params);
+
+    @GET(API_APP)
+    Call<String> app(@QueryMap Map<String, String> params);
+
     @GET("api/{name}")
     Call<ResponseInfo> testHttpGet(@Path("name") String apiAction, @QueryMap Map<String, String> params);
 }

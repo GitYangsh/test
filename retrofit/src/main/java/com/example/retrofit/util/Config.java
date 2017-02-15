@@ -9,6 +9,7 @@ package com.example.retrofit.util;
  * Description:
  */
 
+@SuppressWarnings("JavaDoc")
 public class Config {
 
     public static final boolean DEBUG = true;

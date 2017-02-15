@@ -9,6 +9,7 @@ package com.example.retrofit.network;
  * Description:
  */
 
+@SuppressWarnings("ALL")
 public interface ApiService {
 
 

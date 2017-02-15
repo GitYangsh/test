@@ -11,6 +11,7 @@ import android.view.View;
 import com.example.retrofit.model.ResponseInfo;
 import com.example.retrofit.network.BaseParamsInterceptor;
 import com.example.retrofit.network.NetTool;
+import com.example.retrofit.util.LogUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -24,6 +25,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -54,6 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(NetTool.getServerUrl())
+                .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(okHttpClient)
                 .build();
@@ -62,61 +65,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         DemoService demoService = retrofit.create(DemoService.class);
 
         // step3
-//        Map<String, String> params = new HashMap<>();
-//        params.put("param1", "中文值");
-//        params.put("param2", "value2");
         TreeMap<String, String> params = new TreeMap<>();
         appendCommonParams(MainActivity.this, params);
-        String checkSign = createChecksignString(params, null);
+        params.put("packageName", "com.market2345");
+        String checkSign = createChecksignString(params, null, DemoService.API_APP);
         String sign = md5(checkSign);
+        params.put("_cs", sign);
 
-        Call<ResponseInfo> call = demoService.testHttpGet("retrofitTesting", params);
+        Call<String> call = demoService.app(params);
         // step4
-        call.enqueue(new Callback<ResponseInfo>() {
+        call.enqueue(new Callback<String>() {
             @Override
-            public void onResponse(Call<ResponseInfo> call, Response<ResponseInfo> response) {
-                Log.d(TAG, "onResponse");
-                Log.d(TAG, response.body().describe);
-                ResponseInfo responseInfo = response.body();
+            public void onResponse(Call<String> call, Response<String> response) {
+                LogUtil.i(TAG, "onResponse");
+//                ResponseBody body = response.body();
+//                Source source = body.source();
+//                BufferedSource bs = Okio.buffer(source);
+//                try {
+//                    String s = bs.readString(Charset.forName("utf-8"));
+//                    LogUtil.i(TAG, "response body str:" + s);
+//                    bs.close();
+//                    source.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+
+                System.out.println("response body:" + response.body());
             }
 
             @Override
-            public void onFailure(Call<ResponseInfo> call, Throwable t) {
-                Log.d(TAG, t.getMessage());
-            }
-        });
-
-    }
-
-    private void testRetrofitHttpGet() {
-        // step1
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.20.16:8080")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        // step2
-        DemoService demoService = retrofit.create(DemoService.class);
-
-        // step3
-        Map<String, String> params = new HashMap<>();
-        params.put("param1", "中文值");
-        params.put("param2", "value2");
-
-        Call<ResponseInfo> call = demoService.testHttpGet("retrofitTesting", params);
-
-        // step4
-        call.enqueue(new Callback<ResponseInfo>() {
-            @Override
-            public void onResponse(Call<ResponseInfo> call, Response<ResponseInfo> response) {
-                Log.d(TAG, "onResponse");
-                Log.d(TAG, response.body().describe);
-                ResponseInfo responseInfo = response.body();
-            }
-
-            @Override
-            public void onFailure(Call<ResponseInfo> call, Throwable t) {
-                Log.d(TAG, t.getMessage());
+            public void onFailure(Call<String> call, Throwable t) {
+                LogUtil.i(TAG, "onFailure:" + t.getMessage());
             }
         });
 
@@ -152,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private String createChecksignString(final TreeMap<String, String> params,
-                                         final TreeMap<String, String> postParams) {
+                                         final TreeMap<String, String> postParams, String m) {
         if (params == null) {
             return "";
         }
@@ -160,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         TreeMap<String, String> dest = params;
 
         if (postParams != null) {
-            dest = new TreeMap<String, String>(params);
+            dest = new TreeMap<>(params);
             dest.putAll(postParams);
         }
 
@@ -172,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             sb.append("&");
         }
-        sb.append(NetTool.getSecrectKey()).append('&').append("search");
+        sb.append(NetTool.getSecrectKey()).append('&').append(m);
         return sb.toString();
     }
 
@@ -184,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private String md5(String str, String encodingType) {
-        MessageDigest md5 = null;
+        MessageDigest md5;
         try {
             md5 = MessageDigest.getInstance("MD5");
         } catch (Exception e) {
@@ -200,14 +179,47 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         byte[] md5Bytes = md5.digest();
 
-        StringBuffer hexValue = new StringBuffer();
-        for (int i = 0; i < md5Bytes.length; i++) {
-            int val = ((int) md5Bytes[i]) & 0xff;
+        StringBuilder hexValue = new StringBuilder();
+        for (byte md5Byte : md5Bytes) {
+            int val = ((int) md5Byte) & 0xff;
             if (val < 16) {
                 hexValue.append("0");
             }
             hexValue.append(Integer.toHexString(val));
         }
         return hexValue.toString();
+    }
+
+    private void testRetrofitHttpGet() {
+        // step1
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://192.168.20.16:8080")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        // step2
+        DemoService demoService = retrofit.create(DemoService.class);
+
+        // step3
+        Map<String, String> params = new HashMap<>();
+        params.put("param1", "中文值");
+        params.put("param2", "value2");
+
+        Call<ResponseInfo> call = demoService.testHttpGet("retrofitTesting", params);
+
+        // step4
+        call.enqueue(new Callback<ResponseInfo>() {
+            @Override
+            public void onResponse(Call<ResponseInfo> call, Response<ResponseInfo> response) {
+                Log.d(TAG, "onResponse");
+                Log.d(TAG, response.body().describe);
+            }
+
+            @Override
+            public void onFailure(Call<ResponseInfo> call, Throwable t) {
+                Log.d(TAG, t.getMessage());
+            }
+        });
+
     }
 }
