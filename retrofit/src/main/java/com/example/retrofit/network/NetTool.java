@@ -49,7 +49,9 @@ public class NetTool {
 
     public static String getServerUrl() {
         if (Config.DEBUG) {
-            return "http://192.168.20.16:8080"; // 测试环境
+            //return "http://192.168.20.16:8080"; // 测试环境
+            return "http://market.aijiaoyan.com/api/v1/"; // 正式环境
+
         }
 
         return "http://market.aijiaoyan.com/api/v1/"; // 正式环境
@@ -63,9 +65,9 @@ public class NetTool {
         return "vx8ea3uz"; // 正式环境
     }
 
-    public static enum NET_TYPE {
+    public enum NET_TYPE {
         TYPE_NONE, TYPE_WIFI, TYPE_MOBILE
-    };
+    }
 
     public static NET_TYPE getNetworkType(Context context) {
 
@@ -95,8 +97,8 @@ public class NetTool {
         if (mgr != null) {
             NetworkInfo[] info = mgr.getAllNetworkInfo();
             if (info != null) {
-                for (int i = 0; i < info.length; i++) {
-                    if (info[i].getState() == NetworkInfo.State.CONNECTED) {
+                for (NetworkInfo anInfo : info) {
+                    if (anInfo.getState() == NetworkInfo.State.CONNECTED) {
                         return true;
                     }
                 }
@@ -110,7 +112,6 @@ public class NetTool {
     /**
      * 判断当前网络连接是否为cmwap
      *
-     * @param context
      * @return
      */
     public static boolean isCmwap(Context activity) {
@@ -124,13 +125,8 @@ public class NetTool {
         String typeName = netWrokInfo.getTypeName();
         String extraInfo = netWrokInfo.getExtraInfo();
 
-        if ("MOBILE".equalsIgnoreCase(typeName) && ("cmwap".equalsIgnoreCase(extraInfo)
-                || "3gwap".equalsIgnoreCase(extraInfo) || "uniwap".equalsIgnoreCase(extraInfo))) {
-            return true;
-        } else {
-
-            return false;
-        }
+        return ("MOBILE".equalsIgnoreCase(typeName) && ("cmwap".equalsIgnoreCase(extraInfo)
+                || "3gwap".equalsIgnoreCase(extraInfo) || "uniwap".equalsIgnoreCase(extraInfo)));
     }
 
     public static HttpURLConnection getCmwapConnect(String requestUrl) throws IOException {
@@ -150,7 +146,7 @@ public class NetTool {
         url = new URL(requestUrl);
         con = (HttpURLConnection) url.openConnection();
 
-        String xOnlineHost = null;
+        String xOnlineHost;
         if (port == -1) {
             xOnlineHost = host;
         } else {
@@ -171,7 +167,7 @@ public class NetTool {
     }
 
     public static Map<String, String> getHttpResponseHeader(HttpURLConnection http) {
-        Map<String, String> header = new LinkedHashMap<String, String>();
+        Map<String, String> header = new LinkedHashMap<>();
         for (int i = 0;; i++) {
             String mine = http.getHeaderField(i);
             if (mine == null)
@@ -191,7 +187,7 @@ public class NetTool {
      * @return
      */
     public static String getIMEI(Context context) {
-        String IMEI = "";
+        String IMEI;
         try {
             TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
             IMEI = tm.getDeviceId();
@@ -242,10 +238,9 @@ public class NetTool {
             ApplicationInfo ai = c.getPackageManager().getApplicationInfo(c.getPackageName(),
                     PackageManager.GET_META_DATA);
             Bundle bundle = ai.metaData;
-            String channelNumber = bundle.getString("CHANNEL");
-            return channelNumber;
+            return bundle.getString("CHANNEL");
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         return "unknown";
     }
@@ -260,8 +255,7 @@ public class NetTool {
             ApplicationInfo ai = c.getPackageManager().getApplicationInfo(c.getPackageName(),
                     PackageManager.GET_META_DATA);
             Bundle bundle = ai.metaData;
-            String channelNumber = bundle.getString("CHANNEL_TYPE");
-            return channelNumber;
+            return bundle.getString("CHANNEL_TYPE");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -298,14 +292,8 @@ public class NetTool {
             MessageDigest md = MessageDigest.getInstance("MD5");
 
             byte[] digest = md.digest(cert.getEncoded());
-            String md5 = toHexString(digest);
 
-            // Log.d(TAG, md5);
-            // md5 = "7CCC9B791E78A8F36745C796A0225052";
-            // int ret = NetLib.get(md5);
-            // Log.d(TAG, "ret:" + ret);
-
-            return md5;
+            return toHexString(digest);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -325,14 +313,13 @@ public class NetTool {
      */
     private static String toHexString(byte[] block) {
         StringBuffer buf = new StringBuffer();
-        int len = block.length;
-        for (int i = 0; i < len; i++) {
-            byte2hex(block[i], buf);
+        for (byte aBlock : block) {
+            byte2hex(aBlock, buf);
         }
         return buf.toString();
     }
 
-    public static final String urlEncode(String text) {
+    public static String urlEncode(String text) {
         if (TextUtils.isEmpty(text)) {
             return "";
         }
@@ -345,7 +332,7 @@ public class NetTool {
         return ret;
     }
 
-    public static final String urlDecode(String text) {
+    public static String urlDecode(String text) {
         if (TextUtils.isEmpty(text)) {
             return "";
         }
@@ -420,7 +407,7 @@ public class NetTool {
     }
 
     private static String md5(String str, String encodingType) {
-        MessageDigest md5 = null;
+        MessageDigest md5;
         try {
             md5 = MessageDigest.getInstance("MD5");
         } catch (Exception e) {
@@ -436,9 +423,9 @@ public class NetTool {
 
         byte[] md5Bytes = md5.digest();
 
-        StringBuffer hexValue = new StringBuffer();
-        for (int i = 0; i < md5Bytes.length; i++) {
-            int val = ((int) md5Bytes[i]) & 0xff;
+        StringBuilder hexValue = new StringBuilder();
+        for (byte md5Byte : md5Bytes) {
+            int val = ((int) md5Byte) & 0xff;
             if (val < 16) {
                 hexValue.append("0");
             }
