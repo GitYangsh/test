@@ -1,45 +1,35 @@
 package com.example.ysh.myapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
-import com.daimajia.numberprogressbar.NumberProgressBar;
-import com.example.ysh.myapplication.view.CustomProgressBar;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.Timer;
-import java.util.TimerTask;
+public class MainActivity extends AppCompatActivity implements MainRecyclerViewAdapter.OnChildClickerListener {
 
-public class MainActivity extends AppCompatActivity{
-
-    private Timer timer;
-
-    private NumberProgressBar bnp;
-    private CustomProgressBar bcp;
-    private CustomProgressBar bcp2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        bnp = (NumberProgressBar)findViewById(R.id.numberbar1);
-        bcp = (CustomProgressBar)findViewById(R.id.numberbar2);
-//        bnp.setOnProgressBarListener(this);
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        bnp.incrementProgressBy(1);
-                        bcp.incrementProgressBy(1);
-                    }
-                });
-            }
-        }, 1000, 100);
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
+        List<String> data = new ArrayList<>();
+        data.add("SoftInputMode");
+        data.add("NumberProgressBar");
+
+        MainRecyclerViewAdapter adapter = new MainRecyclerViewAdapter(this, data);
+        adapter.setOnChildClickerListener(this);
+        recyclerView.setAdapter(adapter);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        recyclerView.setLayoutManager(linearLayoutManager);
 
 
     }
@@ -66,15 +56,19 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        timer.cancel();
     }
 
-//    @Override
-//    public void onProgressChange(int current, int max) {
-//        if(current == max) {
-//            Toast.makeText(getApplicationContext(), getString(R.string.finish), Toast.LENGTH_SHORT).show();
-//            bnp.setProgress(0);
-//        }
-//    }
-
+    @Override
+    public void onChildClick(RecyclerView parent, View view, int position, String data) {
+        switch (position) {
+            case 0:
+                startActivity(new Intent(this, SoftInputModeActivity.class));
+                break;
+            case 1:
+                startActivity(new Intent(this, NumberProgressBarActivity.class));
+                break;
+            default:
+                break;
+        }
+    }
 }
