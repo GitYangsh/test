@@ -1,0 +1,21 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="SearchToolbar" parent="Widget.AppCompat.Toolbar">
+        <!--消除导航按钮与Toolbar之间的距离-->
+        <item name="contentInsetStartWithNavigation">0dp</item>
+    </style>
+
+    <style name="ColorTranslucentTheme" parent="AppTheme">
+        <!--<item name="android:windowTranslucentStatus">false</item>-->
+        <!--<item name="android:windowTranslucentNavigation">false</item>-->
+        <item name="android:statusBarColor">@color/colorPrimary</item>
+    </style>
+</resources>

@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">应用市场</string>
+    <string name="search_def">发现海量好应用</string>
+    <string name="download">下载</string>
+
+    <!-- 首页导航 -->
+    <string name="no_login">请登录</string>
+    <string name="app_update">应用更新</string>
+    <string name="app_installed_manager">已安装应用</string>
+    <string name="pkg_installed_manager">安装包管理</string>
+    <string name="feedback">我要反馈</string>
+
+    <!-- 首页底部导航 -->
+    <string name="discovery">发现</string>
+    <string name="tops">排行</string>
+    <string name="game">游戏</string>
+    <string name="app">应用</string>
+
+</resources>
