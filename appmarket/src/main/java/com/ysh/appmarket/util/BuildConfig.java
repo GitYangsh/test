@@ -15,8 +15,8 @@ public class BuildConfig {
 
     public static String getBaseUrl() {
         if (DEBUG) {
-            return "http://192.168.20.16:8080"; // 测试环境
-            //return "http://market.aijiaoyan.com/api/v1/"; // 正式环境
+//            return "http://192.168.20.16:8080"; // 测试环境
+            return "http://market.aijiaoyan.com/api/v1/"; // 正式环境
 
         }
         return "http://market.aijiaoyan.com/api/v1/"; // 正式环境

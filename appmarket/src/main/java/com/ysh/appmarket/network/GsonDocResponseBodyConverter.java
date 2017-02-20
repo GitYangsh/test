@@ -2,10 +2,12 @@ package com.ysh.appmarket.network;
 
 import com.google.gson.Gson;
 import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
 import com.jy.app.market.idata.Doc;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 
 import okhttp3.ResponseBody;
 import retrofit2.Converter;
@@ -30,9 +32,14 @@ final class GsonDocResponseBodyConverter<T> implements Converter<ResponseBody, T
 
     @Override
     public T convert(ResponseBody value) throws IOException {
-        JsonReader jsonReader = gson.newJsonReader(value.charStream());
         try {
-            Doc doc = (Doc) adapter.read(jsonReader);
+            BufferedReader in = new BufferedReader(value.charStream());
+            StringBuffer buffer = new StringBuffer();
+            String line;
+            while ((line = in.readLine()) != null) {
+                buffer.append(line);
+            }
+            Doc doc = Doc.fromJson(buffer.toString());
             if (doc.isOk()) {
                 return doc.getData();
             }

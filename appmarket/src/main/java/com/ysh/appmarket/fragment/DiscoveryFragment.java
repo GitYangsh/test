@@ -60,6 +60,8 @@ public class DiscoveryFragment extends Fragment {
                     PageCard data = response.body();
                     List<Card> cards = data.getCards();
                     mDiscoveryAdapter.setData(cards);
+                } else {
+                    LogUtil.w(TAG, "response.body() is null");
                 }
             }
 
