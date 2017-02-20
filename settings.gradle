@@ -1,1 +1,1 @@
-include ':app', ':recyclerview', ':multitype', ':materialhome', ':testapi', ':retrofit', ':rxjava', ':numberprogressbar'
+include ':app', ':recyclerview', ':multitype', ':materialhome', ':testapi', ':retrofit', ':rxjava', ':numberprogressbar', ':appmarket'
