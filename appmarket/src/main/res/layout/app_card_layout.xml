@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    app:contentPaddingBottom="@dimen/card_padding_top_bottom"
+    app:contentPaddingLeft="@dimen/card_padding_left_right"
+    app:contentPaddingRight="@dimen/card_padding_left_right"
+    app:contentPaddingTop="@dimen/card_padding_top_bottom"
+    android:foreground="?android:attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:background="@drawable/list_clip_bg_selector">
+
+        <ImageView
+            android:id="@+id/app_card_icon"
+            android:layout_width="@dimen/list_app_icon_width"
+            android:layout_height="@dimen/list_app_icon_height"
+            android:src="@mipmap/ic_launcher"/>
+
+        <LinearLayout
+            android:layout_width="0dip"
+            android:layout_height="@dimen/list_app_icon_height"
+            android:layout_marginLeft="14dip"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/app_card_name"
+                    android:layout_width="0dip"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="神庙逃亡"
+                    android:textColor="#595959"
+                    android:textSize="16sp"/>
+
+                <Button
+                    android:id="@+id/app_card_download_button"
+                    android:layout_width="@dimen/download_button_in_list_width"
+                    android:layout_height="30dip"
+                    android:layout_gravity="end|top"
+                    android:padding="0dp"
+                    android:textColor="@color/download_btn_blue_style_text"
+                    android:textSize="@dimen/download_button_in_list_text_size"/>
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dip"
+                android:layout_weight="1">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/app_card_info"
+                        android:layout_width="0dip"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="778万次下载 3.10MB"
+                        android:textColor="#ababab"
+                        android:textSize="10.5sp"/>
+
+                    <LinearLayout
+                        android:id="@+id/app_card_progress_layout"
+                        android:layout_width="0dip"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/app_card_statuswithprogress"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="已暂停"
+                                android:textColor="#ababab"
+                                android:textSize="9sp"/>
+
+                            <TextView
+                                android:id="@+id/app_card_statuswithsize"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentRight="true"
+                                android:text="32.01/32.01M"
+                                android:textColor="#ababab"
+                                android:textSize="9sp"/>
+                        </RelativeLayout>
+
+                        <ProgressBar
+                            android:id="@+id/app_card_progressbar"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/progressbar_listitem_height"
+                            android:layout_below="@id/app_card_statuswithprogress"
+                            android:indeterminateDrawable="@android:drawable/progress_indeterminate_horizontal"
+                            android:indeterminateOnly="false"
+                            android:max="100"
+                            android:progress="50"
+                            android:progressDrawable="@drawable/pb_progress_horizontal"/>
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="@dimen/download_button_in_list_width"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="right"
+                        android:background="#ff00ff00"
+                        android:visibility="invisible"/>
+                </LinearLayout>
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/app_card_desc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:lineSpacingExtra="1dip"
+                android:maxLines="2"
+                android:minLines="1"
+                android:text="一行白鹭上青天，两只烤鸭在前边.一行白鹭上青天，两只烤鸭在前边"
+                android:textColor="#ababab"
+                android:textSize="12sp"/>
+        </LinearLayout>
+    </LinearLayout>
+</android.support.v7.widget.CardView>
