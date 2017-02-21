@@ -56,7 +56,7 @@ public class DiscoveryFragment extends Fragment implements SwipeRefreshLayout.On
 
         mItems = new Items();
         mMultiTypeAdapter = new MultiTypeAdapter(mItems);
-        mMultiTypeAdapter.register(CardApk.class, new CardApkProvider());
+        mMultiTypeAdapter.register(CardApk.class, new CardApkProvider(this));
         recyclerView.setAdapter(mMultiTypeAdapter);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);

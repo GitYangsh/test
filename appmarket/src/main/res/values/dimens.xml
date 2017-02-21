@@ -22,4 +22,6 @@
     <dimen name="pin_progress_button_width">55dip</dimen>
     <dimen name="progressbar_listitem_height">4dip</dimen>
     <dimen name="group_top_item_margin_horizontal">8dip</dimen>
+
+    <dimen name="card_radius">0dip</dimen>
 </resources>

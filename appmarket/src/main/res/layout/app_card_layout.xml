@@ -9,14 +9,14 @@
     app:contentPaddingLeft="@dimen/card_padding_left_right"
     app:contentPaddingRight="@dimen/card_padding_left_right"
     app:contentPaddingTop="@dimen/card_padding_top_bottom"
-    android:foreground="?android:attr/selectableItemBackground">
+    android:foreground="@drawable/card_foreground"
+    android:clickable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:background="@drawable/list_clip_bg_selector">
+        android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/app_card_icon"
