@@ -2,4 +2,24 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <dimen name="card_padding_top_bottom">18dip</dimen>
+    <dimen name="card_padding_left_right">14dip</dimen>
+
+    <dimen name="list_app_icon_width">84dip</dimen>
+    <dimen name="list_app_icon_height">84dip</dimen>
+
+    <dimen name="download_button_in_list_min_height">20dip</dimen>
+    <dimen name="download_button_in_list_min_width">60dip</dimen>
+
+    <dimen name="download_button_in_list_height">30dip</dimen>
+    <dimen name="download_button_in_list_width">60dip</dimen>
+
+    <dimen name="download_button_in_list_text_size">11sp</dimen>
+    <dimen name="download_button_in_list_radius">4dip</dimen>
+
+    <dimen name="pin_progress_button_height">55dip</dimen>
+    <dimen name="pin_progress_button_width">55dip</dimen>
+    <dimen name="progressbar_listitem_height">4dip</dimen>
+    <dimen name="group_top_item_margin_horizontal">8dip</dimen>
 </resources>

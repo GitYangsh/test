@@ -6,13 +6,14 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -22,14 +23,15 @@ import com.ysh.appmarket.fragment.AppFragment;
 import com.ysh.appmarket.fragment.DiscoveryFragment;
 import com.ysh.appmarket.fragment.GameFragment;
 import com.ysh.appmarket.fragment.TopsFragment;
+import com.ysh.appmarket.view.NoScrollViewPager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private DrawerLayout mDrawerLayout;
-    private DiscoveryFragment mDiscoveryFragment;
-    private TopsFragment mTopsFragment;
-    private GameFragment mGameFragment;
-    private AppFragment mAppFragment;
+    private NoScrollViewPager mViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +42,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         initView();
 
-        initFragment();
     }
 
     private void initToolbar() {
@@ -79,6 +80,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+        mViewPager = (NoScrollViewPager) findViewById(R.id.container);
+        List<Fragment> fragmentList = new ArrayList<>();
+        fragmentList.add(new DiscoveryFragment());
+        fragmentList.add(new TopsFragment());
+        fragmentList.add(new GameFragment());
+        fragmentList.add(new AppFragment());
+        mViewPager.setOffscreenPageLimit(fragmentList.size() - 1);
+        mViewPager.setAdapter(new MainFragmentPagerAdapter(getSupportFragmentManager(), fragmentList));
+        mViewPager.setCurrentItem(0);
+        mViewPager.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return false;
+            }
+        });
+
         BottomNavigationView bottomNavigationView = (BottomNavigationView) findViewById(R.id.nav_bottom);
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -86,16 +103,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(MainActivity.this, item.getTitle(), Toast.LENGTH_SHORT).show();
                 switch (item.getItemId()) {
                     case R.id.action_discovery:
-                        replaceFragment(mDiscoveryFragment);
+                        mViewPager.setCurrentItem(0, true);
                         break;
                     case R.id.action_tops:
-                        replaceFragment(mTopsFragment);
+                        mViewPager.setCurrentItem(1, true);
                         break;
                     case R.id.action_game:
-                        replaceFragment(mGameFragment);
+                        mViewPager.setCurrentItem(2, true);
                         break;
                     case R.id.action_app:
-                        replaceFragment(mAppFragment);
+                        mViewPager.setCurrentItem(3, true);
                         break;
                     default:
                         break;
@@ -104,22 +121,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+
     }
 
-    private void initFragment() {
-        mDiscoveryFragment = new DiscoveryFragment();
-        mTopsFragment = new TopsFragment();
-        mGameFragment = new GameFragment();
-        mAppFragment = new AppFragment();
+    private class MainFragmentPagerAdapter extends FragmentPagerAdapter {
 
-        replaceFragment(mDiscoveryFragment);
-    }
+        private List<Fragment> mFragmentList;
 
-    private void replaceFragment(Fragment fragment) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.container, fragment);
-        fragmentTransaction.commit();
+        public MainFragmentPagerAdapter(FragmentManager fm, List<Fragment> fragmentList) {
+            super(fm);
+            mFragmentList = fragmentList;
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return mFragmentList.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return mFragmentList.size();
+        }
     }
 
     @Override

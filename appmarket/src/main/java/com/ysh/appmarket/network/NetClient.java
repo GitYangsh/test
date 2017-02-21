@@ -26,7 +26,7 @@ public class NetClient {
 
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(BuildConfig.getBaseUrl())
-                    .addConverterFactory(GsonDocConverterFactory.create())
+                    .addConverterFactory(DocConverterFactory.create())
                     .addConverterFactory(ScalarsConverterFactory.create())
                     .addConverterFactory(GsonConverterFactory.create())
                     .client(okHttpClient)

@@ -1,9 +1,10 @@
 package com.jy.app.market.idata;
 
+import com.jy.app.market.idata.utils.JsonUtils;
+
+import java.io.Reader;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-
-import com.jy.app.market.idata.utils.JsonUtils;
 
 /**
  * 客户端和服务器的基本数据接口<br>
@@ -172,6 +173,16 @@ public class Doc implements Serializable{
 	 */
 	public static Doc fromJson(String jsonString){
 		return JsonUtils.jsonToDoc(jsonString);		 
+	}
+
+	/**
+	 * 解析JSON Reader到Result对象
+	 *
+	 * @param reader  JSON Reader
+	 * @return Result对象
+	 */
+	public static Doc fromJson(Reader reader){
+		return JsonUtils.jsonToDoc(reader);
 	}
 		
 }

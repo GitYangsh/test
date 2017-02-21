@@ -5,7 +5,23 @@
     <color name="colorPrimaryLight">#4BA0EC</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorTextLight">#FFFFFF</color>
+    <color name="colorTextHint">#AAFFFFFF</color>
     <color name="colorWrite">#FFFFFF</color>
     <color name="divide_line">#9A9A9A</color>
     <color name="background">#F6F6F6</color>
+
+    <!-- blue style -->
+    <color name="download_btn_blue_style_bg_normal">#00adff</color>
+    <color name="download_btn_blue_style_bg_pressed">#008bcc</color>
+    <color name="download_btn_blue_style_text">#ffffff</color>
+    <!-- orange style -->
+    <color name="download_btn_orange_style_bg_normal">#f7931e</color>
+    <color name="download_btn_orange_style_bg_pressed">#cc7818</color>
+    <color name="download_btn_orange_style_text">#595959</color>
+    <!-- gray style -->
+    <color name="download_btn_gray_style_bg_normal">#d8d8d8</color>
+    <color name="download_btn_gray_style_bg_pressed">#b3b3b3</color>
+    <color name="download_btn_gray_style_text">#595959</color>
+    <color name="default_card_pressed">#e4e4e4</color>
+    <drawable name="default_card_pressed_drawable">#e4e4e4</drawable>
 </resources>

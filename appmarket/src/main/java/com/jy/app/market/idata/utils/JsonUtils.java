@@ -1,8 +1,5 @@
 package com.jy.app.market.idata.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -12,6 +9,10 @@ import com.google.gson.JsonParser;
 import com.jy.app.market.idata.Doc;
 import com.jy.app.market.idata.card.Card;
 import com.jy.app.market.idata.data.PageCard;
+
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
 
 public class JsonUtils {
 	private static GsonBuilder gb=new GsonBuilder().setPrettyPrinting().setDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -39,6 +40,25 @@ public class JsonUtils {
 				
 				parseToDoc(r,json);				 				 									
 			}												
+		}catch(Exception e){
+			r=new Doc(666,"JSON数据解析错误: "+e.getMessage());
+		}
+		return r;
+	}
+
+	public static Doc jsonToDoc(Reader reader){
+		Doc r=new Doc();
+		try{
+			JsonObject json=(JsonObject)new JsonParser().parse(reader);
+			r.setStatus(getInt(json,"status",200));
+			r.setMessage(getString(json,"message"));
+
+			JsonElement dataType=json.get("dataType");
+			if(dataType!=null){
+				r.setDataType(dataType.getAsString());
+
+				parseToDoc(r,json);
+			}
 		}catch(Exception e){
 			r=new Doc(666,"JSON数据解析错误: "+e.getMessage());
 		}

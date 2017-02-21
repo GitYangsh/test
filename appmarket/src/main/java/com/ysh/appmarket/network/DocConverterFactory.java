@@ -21,19 +21,19 @@ import retrofit2.Retrofit;
  * Description:
  */
 
-public final class GsonDocConverterFactory extends Converter.Factory {
+public final class DocConverterFactory extends Converter.Factory {
 
     private final Gson gson;
 
-    public static GsonDocConverterFactory create() {
+    public static DocConverterFactory create() {
         return create(new Gson());
     }
 
-    public static GsonDocConverterFactory create(Gson gson) {
-        return new GsonDocConverterFactory(gson);
+    public static DocConverterFactory create(Gson gson) {
+        return new DocConverterFactory(gson);
     }
 
-    private GsonDocConverterFactory(Gson gson) {
+    private DocConverterFactory(Gson gson) {
         if (gson == null) throw new NullPointerException("gson == null");
         this.gson = gson;
     }
@@ -41,13 +41,12 @@ public final class GsonDocConverterFactory extends Converter.Factory {
     @Override
     public Converter<?, RequestBody> requestBodyConverter(Type type, Annotation[] parameterAnnotations, Annotation[] methodAnnotations, Retrofit retrofit) {
         TypeAdapter<?> adapter = gson.getAdapter(TypeToken.get(type));
-        return new GsonDocRequestBodyConverter<>(gson, adapter);
+        return new DocRequestBodyConverter<>(gson, adapter);
     }
 
     @Override
     public Converter<ResponseBody, ?> responseBodyConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
-        TypeAdapter<?> adapter = gson.getAdapter(TypeToken.get(type));
-        return new GsonDocResponseBodyConverter<>(gson, adapter);
+        return new DocResponseBodyConverter<>();
     }
 
 }

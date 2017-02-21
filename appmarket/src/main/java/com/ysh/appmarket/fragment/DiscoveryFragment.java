@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,15 +13,17 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.jy.app.market.idata.card.Card;
+import com.jy.app.market.idata.card.CardApk;
 import com.jy.app.market.idata.data.PageCard;
 import com.ysh.appmarket.R;
-import com.ysh.appmarket.adapter.DiscoveryAdapter;
+import com.ysh.appmarket.card.CardApkProvider;
 import com.ysh.appmarket.network.NetClient;
 import com.ysh.appmarket.util.LogUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import me.drakeet.multitype.Items;
+import me.drakeet.multitype.MultiTypeAdapter;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -34,11 +37,12 @@ import retrofit2.Response;
  * Description:
  */
 
-public class DiscoveryFragment extends Fragment {
+public class DiscoveryFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
     private static final String TAG = DiscoveryFragment.class.getSimpleName();
 
-    private List<Card> mCardArray = new ArrayList<>();
-    private DiscoveryAdapter mDiscoveryAdapter;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private MultiTypeAdapter mMultiTypeAdapter;
+    private Items mItems;
 
     @Nullable
     @Override
@@ -48,10 +52,25 @@ public class DiscoveryFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_discovery, container, false);
 
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
-        mDiscoveryAdapter = new DiscoveryAdapter(getActivity(), mCardArray);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
-        recyclerView.setAdapter(mDiscoveryAdapter);
 
+        mItems = new Items();
+        mMultiTypeAdapter = new MultiTypeAdapter(mItems);
+        mMultiTypeAdapter.register(CardApk.class, new CardApkProvider());
+        recyclerView.setAdapter(mMultiTypeAdapter);
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
+        mSwipeRefreshLayout.setColorSchemeResources(android.R.color.holo_green_dark, android.R.color.holo_orange_dark,
+                android.R.color.holo_blue_dark, android.R.color.holo_red_light);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+        mSwipeRefreshLayout.setRefreshing(true);
+        onRefresh();
+
+        return view;
+    }
+
+    @Override
+    public void onRefresh() {
         Call<PageCard> call = NetClient.apiService().discovery();
         call.enqueue(new Callback<PageCard>() {
             @Override
@@ -59,19 +78,23 @@ public class DiscoveryFragment extends Fragment {
                 if (response.body() != null) {
                     PageCard data = response.body();
                     List<Card> cards = data.getCards();
-                    mDiscoveryAdapter.setData(cards);
+                    for (Card card : cards) {
+                        if (card.getType().equals("CardApk")){
+                            mItems.add(card);
+                        }
+                    }
                 } else {
                     LogUtil.w(TAG, "response.body() is null");
                 }
+                mSwipeRefreshLayout.setRefreshing(false);
             }
 
             @Override
             public void onFailure(Call<PageCard> call, Throwable t) {
                 LogUtil.w(TAG, "failure:" + t.getMessage());
+                mSwipeRefreshLayout.setRefreshing(false);
             }
         });
-
-        return view;
     }
 
     @Override
