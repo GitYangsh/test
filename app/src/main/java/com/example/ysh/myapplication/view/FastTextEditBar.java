@@ -20,7 +20,7 @@ import java.util.List;
 public class FastTextEditBar extends TabLayout {
 
     private OnFastTextEditClickListener mListener;
-    List<EditAction> mEditActions;
+    private List<EditAction> mEditActions;
 
     public FastTextEditBar(Context context) {
         super(context);
@@ -39,14 +39,14 @@ public class FastTextEditBar extends TabLayout {
 
     private void initView() {
         mEditActions = new ArrayList<>();
-//        mEditActions.add(new EditAction("?", "?", 0));
+        mEditActions.add(new EditAction("?", "?", 0));
         mEditActions.add(new EditAction("()", "()", -1));
         mEditActions.add(new EditAction("、", "、", 0));
         mEditActions.add(new EditAction("+", "+", 0));
         mEditActions.add(new EditAction("!", "!", 0));
         mEditActions.add(new EditAction("[]", "[]", -1));
-        mEditActions.add(new EditAction("◀", "", -1));
-        mEditActions.add(new EditAction("▶", "", 1));
+        mEditActions.add(new EditAction("◀", "", -1, true));
+        mEditActions.add(new EditAction("▶", "", 1, true));
 
         for (EditAction action : mEditActions) {
             addTab(newTab().setText(action.text));
@@ -62,7 +62,6 @@ public class FastTextEditBar extends TabLayout {
 
             @Override
             public void onTabUnselected(Tab tab) {
-
             }
 
             @Override
@@ -72,26 +71,32 @@ public class FastTextEditBar extends TabLayout {
                 }
             }
         });
+
     }
 
     public void setFastTextEditClickListener(OnFastTextEditClickListener listener) {
         this.mListener = listener;
     }
 
-    public class EditAction {
+    public static final class EditAction {
         public String text;
         public String content;
         public int cursorOffset;
+        public boolean isLongPress;
 
         public EditAction(String text, String content, int cursorOffset) {
+            this(text, content, cursorOffset, false);
+        }
+
+        public EditAction(String text, String content, int cursorOffset, boolean isLongPress) {
             this.text = text;
             this.content = content;
             this.cursorOffset = cursorOffset;
+            this.isLongPress = isLongPress;
         }
     }
 
-    public interface OnFastTextEditClickListener
-    {
+    public interface OnFastTextEditClickListener {
         void onClick(EditAction editAction);
     }
 }

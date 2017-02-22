@@ -71,21 +71,16 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
         fastTextEditBar.setFastTextEditClickListener(new FastTextEditBar.OnFastTextEditClickListener() {
             @Override
             public void onClick(FastTextEditBar.EditAction editAction) {
-                Editable editable = mEditText.getText();
-                int selectionStart = mEditText.getSelectionStart();
+                if(!TextUtils.isEmpty(editAction.content)) {
+                    mEditText.getText().insert(mEditText.getSelectionStart(), editAction.content);
+                }
 
                 if(editAction.cursorOffset != 0) {
-                    int position = selectionStart + editAction.cursorOffset;
-                    if (position <= editable.length()) {
+                    int position = mEditText.getSelectionStart() + editAction.cursorOffset;
+                    if (position >= 0 && position <= mEditText.getText().length()) {
                         mEditText.setSelection(position);
                     }
                 }
-
-                if(!TextUtils.isEmpty(editAction.content)) {
-                    editable.insert(selectionStart, editAction.content);
-                }
-
-
             }
         });
     }
