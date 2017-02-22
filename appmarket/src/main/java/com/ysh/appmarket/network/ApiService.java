@@ -4,6 +4,7 @@ import com.jy.app.market.idata.data.PageCard;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Query;
 
 /**
  * 类说明：
@@ -19,6 +20,6 @@ public interface ApiService {
     String API_DISCOVERY = "discovery";
 
     @GET(API_DISCOVERY)
-    Call<PageCard> discovery();
+    Call<PageCard> discovery(@Query("pageNo") int pageNo);
 
 }

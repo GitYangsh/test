@@ -1,4 +1,4 @@
-package com.example.ysh.myapplication;
+package com.example.ysh.myapplication.activity;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.daimajia.numberprogressbar.OnProgressBarListener;
+import com.example.ysh.myapplication.R;
 import com.example.ysh.myapplication.view.CustomProgressBar;
 
 import java.util.Timer;

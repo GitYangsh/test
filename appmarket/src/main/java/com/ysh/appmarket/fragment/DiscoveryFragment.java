@@ -43,6 +43,7 @@ public class DiscoveryFragment extends Fragment implements SwipeRefreshLayout.On
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private MultiTypeAdapter mMultiTypeAdapter;
     private Items mItems;
+    private int mPageNo = 1;
 
     @Nullable
     @Override
@@ -51,38 +52,64 @@ public class DiscoveryFragment extends Fragment implements SwipeRefreshLayout.On
         LogUtil.d(TAG, "onCreateView()");
         View view = inflater.inflate(R.layout.fragment_discovery, container, false);
 
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
-
         mItems = new Items();
         mMultiTypeAdapter = new MultiTypeAdapter(mItems);
         mMultiTypeAdapter.register(CardApk.class, new CardApkProvider(this));
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(mMultiTypeAdapter);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            int lastVisiblePosition;
+            int refreshPosition;
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE && lastVisiblePosition == refreshPosition) {
+                    getMoreData();
+                }
+            }
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView,dx, dy);
+                LinearLayoutManager layoutManager = (LinearLayoutManager)recyclerView.getLayoutManager();
+                RecyclerView.Adapter adapter = recyclerView.getAdapter();
+                lastVisiblePosition = layoutManager.findLastCompletelyVisibleItemPosition();
+                refreshPosition = adapter.getItemCount() - 1;
+            }
+        });
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         mSwipeRefreshLayout.setColorSchemeResources(android.R.color.holo_green_dark, android.R.color.holo_orange_dark,
                 android.R.color.holo_blue_dark, android.R.color.holo_red_light);
         mSwipeRefreshLayout.setOnRefreshListener(this);
-        mSwipeRefreshLayout.setRefreshing(true);
         onRefresh();
-
         return view;
     }
 
     @Override
     public void onRefresh() {
-        Call<PageCard> call = NetClient.apiService().discovery();
+        mPageNo = 1;
+        getMoreData();
+    }
+
+    private void getMoreData() {
+        mSwipeRefreshLayout.setRefreshing(true);
+        Call<PageCard> call = NetClient.apiService().discovery(mPageNo);
         call.enqueue(new Callback<PageCard>() {
             @Override
             public void onResponse(Call<PageCard> call, Response<PageCard> response) {
                 if (response.body() != null) {
                     PageCard data = response.body();
                     List<Card> cards = data.getCards();
+                    if (mPageNo == 1) {
+                        mItems.clear();
+                    }
                     for (Card card : cards) {
                         if (card.getType().equals("CardApk")){
                             mItems.add(card);
                         }
                     }
+                    mPageNo++;
                 } else {
                     LogUtil.w(TAG, "response.body() is null");
                 }
