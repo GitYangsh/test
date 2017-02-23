@@ -17,22 +17,22 @@ import java.util.List;
  * Description:
  */
 
-public class FastTextEditBar extends TabLayout {
+public class FastEditBar extends TabLayout {
 
-    private OnFastTextEditClickListener mListener;
+    private OnFastEditClickListener mListener;
     private List<EditAction> mEditActions;
 
-    public FastTextEditBar(Context context) {
+    public FastEditBar(Context context) {
         super(context);
         initView();
     }
 
-    public FastTextEditBar(Context context, AttributeSet attrs) {
+    public FastEditBar(Context context, AttributeSet attrs) {
         super(context, attrs);
         initView();
     }
 
-    public FastTextEditBar(Context context, AttributeSet attrs, int defStyleAttr) {
+    public FastEditBar(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initView();
     }
@@ -49,14 +49,14 @@ public class FastTextEditBar extends TabLayout {
         mEditActions.add(new EditAction("▶", "", 1, true));
 
         for (EditAction action : mEditActions) {
-            addTab(newTab().setText(action.text));
+            addTab(newTab().setText(action.text).setContentDescription(action.text));
         }
 
         addOnTabSelectedListener(new OnTabSelectedListener() {
             @Override
             public void onTabSelected(Tab tab) {
                 if (mListener != null) {
-                    mListener.onClick(mEditActions.get(tab.getPosition()));
+                    mListener.onFastEdit(mEditActions.get(tab.getPosition()));
                 }
             }
 
@@ -67,14 +67,14 @@ public class FastTextEditBar extends TabLayout {
             @Override
             public void onTabReselected(Tab tab) {
                 if (mListener != null) {
-                    mListener.onClick(mEditActions.get(tab.getPosition()));
+                    mListener.onFastEdit(mEditActions.get(tab.getPosition()));
                 }
             }
         });
 
     }
 
-    public void setFastTextEditClickListener(OnFastTextEditClickListener listener) {
+    public void setFastEditClickListener(OnFastEditClickListener listener) {
         this.mListener = listener;
     }
 
@@ -82,13 +82,13 @@ public class FastTextEditBar extends TabLayout {
         public String text;
         public String content;
         public int cursorOffset;
-        public boolean isLongPress;
+        boolean isLongPress;
 
-        public EditAction(String text, String content, int cursorOffset) {
+        EditAction(String text, String content, int cursorOffset) {
             this(text, content, cursorOffset, false);
         }
 
-        public EditAction(String text, String content, int cursorOffset, boolean isLongPress) {
+        EditAction(String text, String content, int cursorOffset, boolean isLongPress) {
             this.text = text;
             this.content = content;
             this.cursorOffset = cursorOffset;
@@ -96,7 +96,7 @@ public class FastTextEditBar extends TabLayout {
         }
     }
 
-    public interface OnFastTextEditClickListener {
-        void onClick(EditAction editAction);
+    public interface OnFastEditClickListener {
+        void onFastEdit(EditAction editAction);
     }
 }

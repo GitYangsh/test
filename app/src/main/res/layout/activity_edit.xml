@@ -16,14 +16,34 @@
     </android.support.v7.widget.Toolbar>
 
     <EditText
+        android:id="@+id/edit_text_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:hint="文章标题"
+        android:imeOptions="actionNext"
+        android:inputType="text"
+        android:maxLines="1"
+        android:padding="5dp"
+        android:text=""/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/divide_line"/>
+
+    <com.example.ysh.myapplication.view.AuthorEditText
         android:id="@+id/edit_text"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:background="@android:color/transparent"
+        android:gravity="top|start"
+        android:hint="文章内容"
         android:inputType="textMultiLine"
-        android:scrollbars="vertical"
-        android:text="____"/>
+        android:padding="5dp"
+        android:lineSpacingMultiplier="1.2"
+        android:scrollbars="vertical"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -114,7 +134,7 @@
             android:textSize="20sp"/>
     </LinearLayout>
 
-    <com.example.ysh.myapplication.view.FastTextEditBar
+    <com.example.ysh.myapplication.view.FastEditBar
         android:id="@+id/tab_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

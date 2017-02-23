@@ -4,15 +4,14 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextUtils;
-import android.text.TextWatcher;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
 import com.example.ysh.myapplication.R;
-import com.example.ysh.myapplication.view.FastTextEditBar;
+import com.example.ysh.myapplication.view.AuthorEditText;
+import com.example.ysh.myapplication.view.FastEditBar;
 
 /**
  * 类说明：
@@ -26,8 +25,9 @@ import com.example.ysh.myapplication.view.FastTextEditBar;
 public class EditActivity extends AppCompatActivity implements View.OnClickListener{
 
     private static final String TAG = EditActivity.class.getSimpleName();
-
+    private static final String SYMBOL_INDENT = "\u3000\u3000";
     EditText mEditText;
+    AuthorEditText mAuthorEditText;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,43 +46,34 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.symbol_7).setOnClickListener(this);
         findViewById(R.id.symbol_8).setOnClickListener(this);
 
-        mEditText = (EditText) findViewById(R.id.edit_text);
+        mAuthorEditText = (AuthorEditText) findViewById(R.id.edit_text);
+        mAuthorEditText.setDefaultText(SYMBOL_INDENT);
+        FastEditBar fastTextEditBar = (FastEditBar) findViewById(R.id.tab_layout);
+        fastTextEditBar.setFastEditClickListener(mAuthorEditText);
+    }
 
-        mEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                Log.d(TAG, "beforeTextChanged: s=" + s + ",start=" + start + ",after=" + after);
-            }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.edit_activity_toolbar, menu);
+        return true;
+    }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                Log.d(TAG, "onTextChanged: s=" + s + ",start=" + start + ",before=" + before + ",count=" + count);
-            }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
 
-            @Override
-            public void afterTextChanged(Editable s) {
-                Log.d(TAG, "afterTextChanged: s=" + s + ",start=");
-                Log.d(TAG, "getSelectionStart: " + mEditText.getSelectionStart());
-                Log.d(TAG, "getSelectionEnd  : " + mEditText.getSelectionEnd());
-            }
-        });
-
-        FastTextEditBar fastTextEditBar = (FastTextEditBar) findViewById(R.id.tab_layout);
-        fastTextEditBar.setFastTextEditClickListener(new FastTextEditBar.OnFastTextEditClickListener() {
-            @Override
-            public void onClick(FastTextEditBar.EditAction editAction) {
-                if(!TextUtils.isEmpty(editAction.content)) {
-                    mEditText.getText().insert(mEditText.getSelectionStart(), editAction.content);
-                }
-
-                if(editAction.cursorOffset != 0) {
-                    int position = mEditText.getSelectionStart() + editAction.cursorOffset;
-                    if (position >= 0 && position <= mEditText.getText().length()) {
-                        mEditText.setSelection(position);
-                    }
-                }
-            }
-        });
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                break;
+            case R.id.action_undo:
+                mAuthorEditText.undo();
+                break;
+            case R.id.action_redo:
+                mAuthorEditText.redo();
+                break;
+            default:
+                break;
+        }
+        return true;
     }
 
     @Override
