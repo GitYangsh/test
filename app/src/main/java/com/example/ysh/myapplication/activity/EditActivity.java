@@ -13,6 +13,8 @@ import com.example.ysh.myapplication.R;
 import com.example.ysh.myapplication.view.AuthorEditText;
 import com.example.ysh.myapplication.view.FastEditBar;
 
+import java.util.LinkedList;
+
 /**
  * 类说明：
  *
@@ -50,6 +52,20 @@ public class EditActivity extends AppCompatActivity implements View.OnClickListe
         mAuthorEditText.setDefaultText(SYMBOL_INDENT);
         FastEditBar fastTextEditBar = (FastEditBar) findViewById(R.id.tab_layout);
         fastTextEditBar.setFastEditClickListener(mAuthorEditText);
+
+        LinkedList<String> stack = new LinkedList<>();
+        stack.push("1");
+        stack.push("2");
+        stack.push("3");
+        stack.push("4");
+        stack.push("5");
+        System.out.println(stack);
+        stack.pop();
+        System.out.println(stack);
+        stack.push("6");
+        System.out.println(stack);
+        stack.removeLast();
+        System.out.println(stack);
     }
 
     @Override

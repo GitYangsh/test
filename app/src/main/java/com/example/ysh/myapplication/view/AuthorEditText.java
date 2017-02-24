@@ -9,7 +9,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 
-import java.util.Stack;
+import java.util.LinkedList;
 
 /**
  * 类说明：
@@ -23,21 +23,21 @@ public class AuthorEditText extends EditText implements View.OnKeyListener, Fast
 
     private static final String TAG = AuthorEditText.class.getSimpleName();
     private static final String SYMBOL_INDENT = "\u3000\u3000";
-    private static final int HISTORY_MAX_SIZE = 5;
+    private static final int HISTORY_MAX_SIZE = 50;
 
     private Editable mEditable;
     /**
      * 操作序号(一次编辑可能对应多个操作，如替换文字，就是删除+插入)
      */
-    private int mActionIndex;
+    private long mActionIndex;
     /**
      * 撤销栈
      */
-    private final Stack<Action> mHistory = new Stack<>();
+    private final LinkedList<Action> mHistory = new LinkedList<>();
     /**
      * 恢复栈
      */
-    private final Stack<Action> mHistoryBack = new Stack<>();
+    private final LinkedList<Action> mHistoryBack = new LinkedList<>();
     /**
      * 自动操作标志，防止重复回调,导致无限撤销
      */
@@ -46,7 +46,6 @@ public class AuthorEditText extends EditText implements View.OnKeyListener, Fast
      * 记录修改之前的文字
      */
     private CharSequence mBeforeChangeText;
-
     /**
      * 恢复栈最大容量
      */
@@ -83,10 +82,12 @@ public class AuthorEditText extends EditText implements View.OnKeyListener, Fast
      */
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-        Log.d(TAG, "onTextChanged:start=" + start + ",before=" + before + ",count=" + count + ",s=" + s);
         if (mLockFlag) {
+            mBeforeChangeText = s.subSequence(0, s.length());
             return;
         }
+        Log.d(TAG, "onTextChanged:start=" + start + ",before=" + before + ",count=" + count + ",s=" + s);
+        Log.d(TAG, "mBeforeChangeText:s=" + mBeforeChangeText);
         // 1.增加文字：start=操作之前光标位置,before=0,count=文字个数,
         //   增加文字内容=s.subSequence(start, start + count);
         // 2.删除文字：start=操作之后光标位置,before=删除文字个数,count=0,
@@ -95,22 +96,20 @@ public class AuthorEditText extends EditText implements View.OnKeyListener, Fast
         if (before == 0 && count > 0) {
             Action addAction = newAction(s, start, count, true, ++mActionIndex);
             addHistoryStack(addAction);
-            mBeforeChangeText = s.subSequence(0, s.length());
         } else if (before > 0 && count == 0) {
             Action delAction = newAction(mBeforeChangeText, start, before, false, ++mActionIndex);
             addHistoryStack(delAction);
-            mBeforeChangeText = s.subSequence(0, s.length());
         } else if (before > 0 && count > 0) {
             //先删除，后增加，使用一个index
             Action delAction = newAction(mBeforeChangeText, start, before, false, ++mActionIndex);
             Action addAction = newAction(s, start, count, true, mActionIndex);
             addHistoryStack(delAction);
             addHistoryStack(addAction);
-            mBeforeChangeText = s.subSequence(0, s.length());
         }
+        mBeforeChangeText = s.subSequence(0, s.length());
     }
 
-    private Action newAction(CharSequence s, int start, int count, boolean isAdd, int index) {
+    private Action newAction(CharSequence s, int start, int count, boolean isAdd, long index) {
         Log.d(TAG, "newAction:s.length=" + s.length() + ",start=" + start + ",end=" + (start + count) + ",s=" + s);
         CharSequence charSequence = s.subSequence(start, start + count);
         return new Action(charSequence, start, isAdd, index);
@@ -119,10 +118,17 @@ public class AuthorEditText extends EditText implements View.OnKeyListener, Fast
     private void addHistoryStack(Action action) {
         mHistory.push(action);
         mHistoryBack.clear();
+
         if (mHistory.size() > mHistoryMaxSize) {
-            mHistory.remove(0);
+            // 大于恢复栈最大容量时，删除第一条index相同的历史记录
+            long lastIndex = mHistory.removeLast().index;
+            for (int i = mHistory.size(); i > 0; i--) {
+                if (lastIndex != mHistory.getLast().index) {
+                    break;
+                }
+                mHistory.removeLast();
+            }
         }
-        Log.d(TAG, "mHistory.size()=" + mHistory.size());
     }
 
     @Override
@@ -154,6 +160,17 @@ public class AuthorEditText extends EditText implements View.OnKeyListener, Fast
     }
 
     /**
+     * 首次设置文本
+     * Set default text.
+     */
+    public final void setDefaultText(CharSequence text) {
+        clearHistory();
+        mLockFlag = true;
+        mEditable.replace(0, mEditable.length(), text);
+        mLockFlag = false;
+    }
+
+    /**
      * 清理记录
      * Clear history.
      */
@@ -167,7 +184,7 @@ public class AuthorEditText extends EditText implements View.OnKeyListener, Fast
      * Undo.
      */
     public final void undo() {
-        if (mHistory.empty()) {
+        if (mHistory.isEmpty()) {
             return;
         }
         //锁定操作
@@ -186,7 +203,7 @@ public class AuthorEditText extends EditText implements View.OnKeyListener, Fast
         //释放操作
         mLockFlag = false;
         //判断是否是下一个动作是否和本动作是同一个操作，直到不同为止
-        if (!mHistory.empty() && mHistory.peek().index == action.index) {
+        if (!mHistory.isEmpty() && mHistory.peek().index == action.index) {
             undo();
         }
     }
@@ -196,7 +213,7 @@ public class AuthorEditText extends EditText implements View.OnKeyListener, Fast
      * Redo.
      */
     public final void redo() {
-        if (mHistoryBack.empty()) {
+        if (mHistoryBack.isEmpty()) {
             return;
         }
         mLockFlag = true;
@@ -213,20 +230,9 @@ public class AuthorEditText extends EditText implements View.OnKeyListener, Fast
         }
         mLockFlag = false;
         //判断是否是下一个动作是否和本动作是同一个操作
-        if (!mHistoryBack.empty() && mHistoryBack.peek().index == action.index) {
+        if (!mHistoryBack.isEmpty() && mHistoryBack.peek().index == action.index) {
             redo();
         }
-    }
-
-    /**
-     * 首次设置文本
-     * Set default text.
-     */
-    public final void setDefaultText(CharSequence text) {
-        clearHistory();
-        mLockFlag = true;
-        mEditable.replace(0, mEditable.length(), text);
-        mLockFlag = false;
     }
 
     private class Action {
@@ -245,9 +251,9 @@ public class AuthorEditText extends EditText implements View.OnKeyListener, Fast
         /**
          * 操作序号.
          */
-        final int index;
+        final long index;
 
-        Action(CharSequence text, int start, boolean add, int index) {
+        Action(CharSequence text, int start, boolean add, long index) {
             this.text = text;
             this.start = start;
             this.isAdd = add;
