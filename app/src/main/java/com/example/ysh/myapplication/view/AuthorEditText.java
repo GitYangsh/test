@@ -19,7 +19,7 @@ import java.util.LinkedList;
  *         Description:
  */
 
-public class AuthorEditText extends EditText implements View.OnKeyListener, FastEditBar.OnFastEditClickListener {
+public class AuthorEditText extends EditText implements FastEditBar.OnFastEditClickListener {
 
     private static final String TAG = AuthorEditText.class.getSimpleName();
     private static final String SYMBOL_INDENT = "\u3000\u3000";
@@ -69,7 +69,18 @@ public class AuthorEditText extends EditText implements View.OnKeyListener, Fast
 
     private void init() {
         mEditable = getText();
-        setOnKeyListener(this);
+
+        setOnKeyListener(new OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
+                    // 换行之后加缩进，actionIndex保持一致
+                    mActionIndex--;
+                    mEditable.insert(getSelectionStart(), SYMBOL_INDENT);
+                }
+                return false;
+            }
+        });
     }
 
     /**
@@ -129,17 +140,6 @@ public class AuthorEditText extends EditText implements View.OnKeyListener, Fast
                 mHistory.removeLast();
             }
         }
-    }
-
-    @Override
-    public boolean onKey(View v, int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
-            Log.d(TAG, "onKey:keyCode=" + keyCode + ",event=" + event);
-            // 换行之后加缩进，actionIndex保持一致
-            mActionIndex--;
-            mEditable.insert(getSelectionStart(), SYMBOL_INDENT);
-        }
-        return false;
     }
 
     @Override

@@ -12,9 +12,8 @@ import java.util.List;
  * 类说明：
  *
  * @author yangsh
- * @version 1.0
- * @time 2017/2/22 16:04
- * Description:
+ *         CreateTime: 2017/2/22 16:04
+ *         Description:
  */
 
 public class FastEditBar extends TabLayout {
@@ -78,10 +77,10 @@ public class FastEditBar extends TabLayout {
         this.mListener = listener;
     }
 
-    public static final class EditAction {
-        public String text;
-        public String content;
-        public int cursorOffset;
+    public class EditAction {
+        String text;
+        String content;
+        int cursorOffset;
         boolean isLongPress;
 
         EditAction(String text, String content, int cursorOffset) {
