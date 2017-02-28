@@ -71,21 +71,44 @@ public class MyFastScroller {
             int visibleWidth = mEditText.getWidth();
             int scrollY = mEditText.getScrollY();
             float percent = 1.0f * scrollY / (totalHeight - visibleHeight);
-            int offset = (int)((1.0f * mThumbH / visibleHeight) * totalHeight);
             int thumbY = (int) (percent * totalHeight);
-
-            if (mOffset >= 0) {
-                if (thumbY < totalHeight / 2) {
-                    mThumbDrawable.setBounds(visibleWidth - mThumbW, thumbY, visibleWidth, thumbY + mThumbH);
-                }
-                if (thumbY < totalHeight / 2 + mThumbH) {
-                    mThumbDrawable.setBounds(visibleWidth - mThumbW, scrollY + (int)(1.0f * scrollY / totalHeight * visibleHeight), visibleWidth, scrollY + (int)(1.0f * scrollY / totalHeight * visibleHeight) + mThumbH);
-                } else {
-                    mThumbDrawable.setBounds(visibleWidth - mThumbW, thumbY - mThumbH, visibleWidth, thumbY);
-                }
+//
+//            if (thumbY < totalHeight / 2) {
+//                mThumbDrawable.setBounds(visibleWidth - mThumbW, thumbY, visibleWidth, thumbY + mThumbH);
+//            }
+//            if (thumbY < totalHeight / 2 + mThumbH) {
+//                mThumbDrawable.setBounds(visibleWidth - mThumbW, scrollY + (int) (1.0f * scrollY / totalHeight * visibleHeight), visibleWidth, scrollY + (int) (1.0f * scrollY / totalHeight * visibleHeight) + mThumbH);
+//            } else {
+//                mThumbDrawable.setBounds(visibleWidth - mThumbW, thumbY - mThumbH, visibleWidth, thumbY);
+//            }
+//            if (thumbY > scrollY + visibleHeight - mThumbH) {
+//                thumbY = scrollY + visibleHeight - mThumbH;
+//            }
+//            mThumbDrawable.setBounds(visibleWidth - mThumbW, thumbY, visibleWidth, thumbY + mThumbH);
+//
+            int offset = totalHeight - visibleHeight - scrollY;
+            double a = 0;
+            if (offset == 0) {
+                a = 100000;
             } else {
-
+                a = (1.0 * scrollY / (totalHeight - visibleHeight - scrollY));
             }
+            int b = visibleHeight - mThumbH;
+            int x = (int)((a * b) / (1 + a));
+            if (x < 1) {
+                 x = 0;
+            }
+            thumbY = scrollY + x;
+            System.out.println("====scrollY:" + scrollY);
+            System.out.println("====totalHeight:" + totalHeight);
+            System.out.println("====visibleHeight:" + visibleHeight);
+            System.out.println("====totalHeight - visibleHeight - scrollY:" + (totalHeight - visibleHeight - scrollY));
+            System.out.println("====a:" + a);
+            System.out.println("====b:" + b);
+            System.out.println("====x:" + x);
+            System.out.println("====thumbY:" + thumbY);
+            mThumbDrawable.setBounds(visibleWidth - mThumbW, thumbY, visibleWidth, thumbY + mThumbH);
+
             mState = state;
         } else {
             mState = STATE_HIDE;
@@ -105,9 +128,9 @@ public class MyFastScroller {
 
     private boolean isPointInside(float x, float y) {
         Rect rect = mThumbDrawable.getBounds();
-        System.out.println("====x:" + x + ",y:" + y);
-        System.out.println("====rect:" + rect.toShortString());
-        System.out.println("====mEditText.getScrollY():" + mEditText.getScrollY());
+//        System.out.println("====x:" + x + ",y:" + y);
+//        System.out.println("====rect:" + rect.toShortString());
+//        System.out.println("====mEditText.getScrollY():" + mEditText.getScrollY());
         return (x > rect.left) && (y > rect.top - mEditText.getScrollY()) && (y < rect.bottom - mEditText.getScrollY());
     }
 
