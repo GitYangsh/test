@@ -3,6 +3,7 @@ package com.example.ysh.myapplication.view;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -43,9 +44,9 @@ public class AuthorEditText extends EditText implements FastEditBar.OnFastEditCl
      */
     private boolean mLockFlag = false;
     /**
-     * 记录修改之前的文字
+     * 是否首行缩进
      */
-    private CharSequence mBeforeChangeText;
+    private boolean mIsIndent = false;
     /**
      * 恢复栈最大容量
      */
@@ -74,54 +75,58 @@ public class AuthorEditText extends EditText implements FastEditBar.OnFastEditCl
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
-                    // 换行之后加缩进，actionIndex保持一致
-                    mActionIndex--;
-                    mEditable.insert(getSelectionStart(), SYMBOL_INDENT);
+                    if (mIsIndent) {
+                        // 换行之后加缩进，actionIndex保持一致
+                        mActionIndex--;
+                        mEditable.insert(getSelectionStart(), SYMBOL_INDENT);
+                    }
                 }
                 return false;
             }
         });
-    }
 
-    /**
-     * On text changed. Override by TextView
-     *
-     * @param s      the s
-     * @param start  the start 起始光标
-     * @param before the before 选择数量
-     * @param count  the endCursor 添加的数量
-     */
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-        if (mLockFlag) {
-            mBeforeChangeText = s.subSequence(0, s.length());
-            return;
-        }
-        Log.d(TAG, "onTextChanged:start=" + start + ",before=" + before + ",count=" + count + ",s=" + s);
-        Log.d(TAG, "mBeforeChangeText:s=" + mBeforeChangeText);
-        // 1.增加文字：start=操作之前光标位置,before=0,count=文字个数,
-        //   增加文字内容=s.subSequence(start, start + count);
-        // 2.删除文字：start=操作之后光标位置,before=删除文字个数,count=0,
-        //   删除文字内容=beforeChangeText.subSequence(start, start + before);
-        // 3.替换文字：before=选择文字个数,count=替换文字个数
-        if (before == 0 && count > 0) {
-            Action addAction = newAction(s, start, count, true, ++mActionIndex);
-            addHistoryStack(addAction);
-        } else if (before > 0 && count == 0) {
-            Action delAction = newAction(mBeforeChangeText, start, before, false, ++mActionIndex);
-            addHistoryStack(delAction);
-        } else if (before > 0 && count > 0) {
-            //先删除，后增加，使用一个index
-            Action delAction = newAction(mBeforeChangeText, start, before, false, ++mActionIndex);
-            Action addAction = newAction(s, start, count, true, mActionIndex);
-            addHistoryStack(delAction);
-            addHistoryStack(addAction);
-        }
-        mBeforeChangeText = s.subSequence(0, s.length());
+        addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                Log.d(TAG, "beforeTextChanged:start=" + start + ",count=" + count + ",after=" + after + ",s=" + s);
+                if (mLockFlag) {
+                    return;
+                }
+                // 删除文字
+                if (count > 0) {
+                    Action addAction = newAction(s, start, count, false, ++mActionIndex);
+                    addHistoryStack(addAction);
+                }
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                Log.d(TAG, "onTextChanged:start=" + start + ",before=" + before + ",count=" + count + ",s=" + s);
+                if (mLockFlag) {
+                    return;
+                }
+                // 输入文字
+                if (count > 0) {
+                    //before = 0 时，输入文字，index增加
+                    //before > 0 时，替换文字，index不变
+                    if (before == 0) {
+                        ++mActionIndex;
+                    }
+                    Action addAction = newAction(s, start, count, true, mActionIndex);
+                    addHistoryStack(addAction);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
     }
 
     private Action newAction(CharSequence s, int start, int count, boolean isAdd, long index) {
-        Log.d(TAG, "newAction:s.length=" + s.length() + ",start=" + start + ",end=" + (start + count) + ",s=" + s);
+        Log.d(TAG, "newAction:s.length=" + s.length() + ",start=" + start + ",end=" + (start + count) + ",isAdd=" + isAdd + ",s=" + s);
         CharSequence charSequence = s.subSequence(start, start + count);
         return new Action(charSequence, start, isAdd, index);
     }
@@ -163,11 +168,24 @@ public class AuthorEditText extends EditText implements FastEditBar.OnFastEditCl
      * 首次设置文本
      * Set default text.
      */
-    public final void setDefaultText(CharSequence text) {
+    public void setDefaultText(CharSequence text) {
         clearHistory();
         mLockFlag = true;
         mEditable.replace(0, mEditable.length(), text);
         mLockFlag = false;
+    }
+
+    /**
+     * 设置首行缩进
+     * Set indent.
+     */
+    public void setIndent(boolean isIndent) {
+        mIsIndent = isIndent;
+        if (mIsIndent) {
+            mLockFlag = true;
+            mEditable.insert(0, SYMBOL_INDENT);
+            mLockFlag = false;
+        }
     }
 
     /**

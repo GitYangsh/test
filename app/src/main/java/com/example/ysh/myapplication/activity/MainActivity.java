@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.example.ysh.myapplication.R;
+import com.example.ysh.myapplication.view.FastScrollEditText;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +25,9 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
         List<String> data = new ArrayList<>();
-        data.add("SoftInputMode");
         data.add("NumberProgressBar");
+        data.add("Edit");
+        data.add("Read");
 
         MainRecyclerViewAdapter adapter = new MainRecyclerViewAdapter(this, data);
         adapter.setOnChildClickerListener(this);
@@ -34,6 +36,11 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         recyclerView.setLayoutManager(linearLayoutManager);
 
 
+        FastScrollEditText fastScrollEditText = (FastScrollEditText) findViewById(R.id.edit_text);
+        fastScrollEditText.setFastScrollEnabled(true);
+        for (int i = 0; i < 100; i++) {
+            fastScrollEditText.append(i + "刷机的手机点击圣诞节\n");
+        }
     }
 
     @Override
@@ -64,10 +71,13 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
     public void onChildClick(RecyclerView parent, View view, int position, String data) {
         switch (position) {
             case 0:
-                startActivity(new Intent(this, EditActivity.class));
+                startActivity(new Intent(this, NumberProgressBarActivity.class));
                 break;
             case 1:
-                startActivity(new Intent(this, NumberProgressBarActivity.class));
+                startActivity(new Intent(this, EditActivity.class));
+                break;
+            case 2:
+                startActivity(new Intent(this, ReadActivity.class));
                 break;
             default:
                 break;
