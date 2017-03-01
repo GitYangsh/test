@@ -67,10 +67,6 @@ public class FastScrollEditText extends EditText {
         return super.onTouchEvent(event);
     }
 
-    public int getVisibleHeight() {
-        return (getBottom() - getTop() - getExtendedPaddingBottom() - getExtendedPaddingTop());
-    }
-
     public void moveToLine(int line) {
         int start = getLayout().getLineStart(line);
         setSelection(start);

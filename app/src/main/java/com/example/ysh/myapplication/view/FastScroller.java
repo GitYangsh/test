@@ -27,6 +27,7 @@ public class FastScroller {
     private static final int STATE_DRAG = 3;
 
     private static final int DEFAULT_ALPHA = 200;
+    private static final int DEFAULT_PAGE = 2;
     private FastScrollEditText mEditText;
     private Drawable mThumbDrawable;
     private int mThumbW;
@@ -34,7 +35,6 @@ public class FastScroller {
     private int mState = STATE_NONE;
     private float mTouchDownY;
     private AnimatorSet mHideAnimSet = new AnimatorSet();
-    private boolean mIsHide;
 
     public FastScroller(FastScrollEditText fastScrollEditText) {
         mEditText = fastScrollEditText;
@@ -86,13 +86,18 @@ public class FastScroller {
 
     private void changeScrollState() {
         int totalHeight = mEditText.getLayout().getHeight();
-        int visibleHeight = mEditText.getVisibleHeight();
-        if (totalHeight > visibleHeight) {
+        int visibleHeight = mEditText.getHeight();
+        if (totalHeight / visibleHeight >= DEFAULT_PAGE) {
+            if (mEditText.isVerticalScrollBarEnabled()) {
+                mEditText.setVerticalScrollBarEnabled(false);
+            }
             int visibleWidth = mEditText.getWidth();
-
             int scrollY = mEditText.getScrollY();
             int hideHeight = totalHeight - visibleHeight;
             float percent = (1.0f * scrollY / hideHeight);
+            if (percent > 1.0f) {
+                percent = 1.0f;
+            }
             int totalOffset = visibleHeight - mThumbH;
             int offset = (int) (percent * totalOffset);
             int thumbY = scrollY + offset;
@@ -100,8 +105,16 @@ public class FastScroller {
             if (mState == STATE_NONE || mState == STATE_HIDE) {
                 setState(STATE_VISIBLE);
             }
+            if (percent == 1.0f) {
+                setState(STATE_HIDE);
+            }
         } else {
-            setState(STATE_NONE);
+            if (!mEditText.isVerticalScrollBarEnabled()) {
+                mEditText.setVerticalScrollBarEnabled(true);
+            }
+            if (mState != STATE_NONE) {
+                setState(STATE_NONE);
+            }
         }
     }
 
@@ -144,7 +157,7 @@ public class FastScroller {
             return;
         }
         int totalHeight = mEditText.getLayout().getHeight();
-        int visibleHeight = mEditText.getVisibleHeight();
+        int visibleHeight = mEditText.getHeight();
         float percent = event.getY() / visibleHeight;
         if (percent > 1) {
             percent = 1;
@@ -162,9 +175,7 @@ public class FastScroller {
     private void setState(int state) {
         switch (state) {
             case STATE_NONE:
-                if (!mIsHide) {
-                    startHideAnim();
-                }
+                break;
             case STATE_HIDE:
                 startHideAnim();
                 break;
@@ -191,7 +202,6 @@ public class FastScroller {
     private void startHideAnim() {
         if (!mHideAnimSet.isStarted() && !mHideAnimSet.isRunning()) {
             mHideAnimSet.start();
-            mIsHide = true;
         }
     }
 
@@ -199,7 +209,6 @@ public class FastScroller {
         if (mHideAnimSet.isStarted() || mHideAnimSet.isRunning()) {
             mHideAnimSet.cancel();
         }
-        mIsHide = false;
         mThumbDrawable.setAlpha(DEFAULT_ALPHA);
     }
 }
