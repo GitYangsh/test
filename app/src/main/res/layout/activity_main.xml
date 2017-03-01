@@ -19,6 +19,7 @@
         android:id="@+id/edit_text"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="top"
+        android:gravity="top|start"
+        android:lineSpacingMultiplier="1.2"
         android:background="@color/colorPrimary"/>
 </LinearLayout>

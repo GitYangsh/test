@@ -59,6 +59,10 @@ public class FastScrollEditText extends EditText {
             if (mFastScroller.onInterceptTouchEvent(event)) {
                 return mFastScroller.onTouchEvent(event);
             }
+
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                mFastScroller.hide();
+            }
         }
         return super.onTouchEvent(event);
     }

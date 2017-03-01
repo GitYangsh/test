@@ -1,5 +1,8 @@
 package com.example.ysh.myapplication.view;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -18,16 +21,19 @@ import com.example.ysh.myapplication.R;
  */
 
 public class FastScroller {
-    private static final int STATE_HIDE = 0;
-    private static final int STATE_VISIBLE = 1;
-    private static final int STATE_DRAG = 2;
+    private static final int STATE_NONE = 0;
+    private static final int STATE_HIDE = 1;
+    private static final int STATE_VISIBLE = 2;
+    private static final int STATE_DRAG = 3;
 
+    private static final int DEFAULT_ALPHA = 200;
     private FastScrollEditText mEditText;
     private Drawable mThumbDrawable;
     private int mThumbW;
     private int mThumbH;
-    private int mState = STATE_HIDE;
+    private int mState = STATE_NONE;
     private float mTouchDownY;
+    private AnimatorSet mHideAnimSet = new AnimatorSet();
 
     public FastScroller(FastScrollEditText fastScrollEditText) {
         mEditText = fastScrollEditText;
@@ -36,15 +42,36 @@ public class FastScroller {
 
     private void init(Context context) {
         mThumbDrawable = context.getResources().getDrawable(R.drawable.scrollbar_handle_accelerated_anim2);
-        mThumbDrawable.setAlpha(200);
         mThumbW = context.getResources().getDimensionPixelSize(R.dimen.fast_scrollbar_width);
         mThumbH = context.getResources().getDimensionPixelSize(R.dimen.fast_scrollbar_height);
+
+        mEditText.post(new Runnable() {
+            @Override
+            public void run() {
+                ObjectAnimator alphaAnim = ObjectAnimator.ofInt(mThumbDrawable, "alpha", DEFAULT_ALPHA, 0);
+                ValueAnimator hideAnim = ValueAnimator.ofInt(mEditText.getWidth() - mThumbW, mEditText.getWidth());
+                hideAnim.setDuration(300);
+                hideAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
+                        int currentValue = (int) animation.getAnimatedValue();
+                        Rect rect = mThumbDrawable.getBounds();
+                        rect.left = currentValue;
+                        mThumbDrawable.setBounds(rect);
+                        mEditText.invalidate(rect);
+                    }
+                });
+                mHideAnimSet.play(hideAnim).with(alphaAnim);
+                mHideAnimSet.setStartDelay(1500);
+            }
+        });
     }
 
     public void draw(Canvas canvas) {
-        if (mState == STATE_HIDE) {
+        if (mState == STATE_NONE) {
             return;
         }
+
         mThumbDrawable.draw(canvas);
     }
 
@@ -69,8 +96,8 @@ public class FastScroller {
             int offset = (int) (percent * totalOffset);
             int thumbY = scrollY + offset;
             mThumbDrawable.setBounds(visibleWidth - mThumbW, thumbY, visibleWidth, thumbY + mThumbH);
-            if (mState == STATE_HIDE) {
-                mState = STATE_VISIBLE;
+            if (mState == STATE_NONE || mState == STATE_HIDE) {
+                setState(STATE_VISIBLE);
             }
         }
     }
@@ -79,8 +106,8 @@ public class FastScroller {
         if (mState == STATE_DRAG) {
             return true;
         }
-        if ((mState != STATE_HIDE) && (event.getAction() == MotionEvent.ACTION_DOWN) && (isPointInside(event.getX(), event.getY()))) {
-            mState = STATE_DRAG;
+        if ((event.getAction() == MotionEvent.ACTION_DOWN) && (isPointInside(event.getX(), event.getY()))) {
+            setState(STATE_DRAG);
             return true;
         }
         return false;
@@ -95,15 +122,13 @@ public class FastScroller {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mTouchDownY = event.getY();
-                System.out.println("====DOWN event.getY()=" + event.getY());
+                stopAnim();
                 break;
             case MotionEvent.ACTION_MOVE:
-                System.out.println("====MOVE event.getY()=" + event.getY());
                 scrollTo(event);
                 break;
             case MotionEvent.ACTION_UP:
-                System.out.println("====UP event.getY()=" + event.getY());
-                mState = STATE_VISIBLE;
+                setState(STATE_HIDE);
                 break;
             default:
                 break;
@@ -132,7 +157,41 @@ public class FastScroller {
         mEditText.moveToLine(targetLine);
     }
 
-    void stop() {
+    private void setState(int state) {
+        switch (state) {
+            case STATE_HIDE:
+                startAnim();
+                break;
+            case STATE_VISIBLE:
+                stopAnim();
+                break;
+            case STATE_DRAG:
+                stopAnim();
+                break;
+            default:
+                break;
+        }
+        mState = state;
+    }
 
+    void hide() {
+        setState(STATE_HIDE);
+    }
+
+    void stop() {
+        stopAnim();
+    }
+
+    private void startAnim() {
+        if (!mHideAnimSet.isStarted() && !mHideAnimSet.isRunning()) {
+            mHideAnimSet.start();
+        }
+    }
+
+    private void stopAnim() {
+        if (mHideAnimSet.isStarted() || mHideAnimSet.isRunning()) {
+            mHideAnimSet.cancel();
+        }
+        mThumbDrawable.setAlpha(DEFAULT_ALPHA);
     }
 }

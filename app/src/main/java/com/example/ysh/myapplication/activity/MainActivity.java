@@ -17,7 +17,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements MainRecyclerViewAdapter.OnChildClickerListener {
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,10 +37,14 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
 
         FastScrollEditText fastScrollEditText = (FastScrollEditText) findViewById(R.id.edit_text);
         fastScrollEditText.setFastScrollEnabled(true);
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 50; i++) {
-            fastScrollEditText.append(i + "刷机的手机点击圣诞节\n");
+            sb.append(i + "刷机的手机点击圣诞节\n");
         }
+        fastScrollEditText.setText(sb.toString());
+        fastScrollEditText.setSelection(fastScrollEditText.getText().length());
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
