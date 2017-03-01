@@ -42,7 +42,7 @@ public class FastScrollEditText extends EditText {
     protected void onScrollChanged(int horiz, int vert, int oldHoriz, int oldVert) {
         super.onScrollChanged(horiz, vert, oldHoriz, oldVert);
         if (mFastScroller != null) {
-            mFastScroller.onScrollChanged(horiz, vert, oldHoriz, oldVert);
+            mFastScroller.onScrollChanged();
         }
     }
 

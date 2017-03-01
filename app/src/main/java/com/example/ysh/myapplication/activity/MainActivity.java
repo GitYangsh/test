@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
 
         FastScrollEditText fastScrollEditText = (FastScrollEditText) findViewById(R.id.edit_text);
         fastScrollEditText.setFastScrollEnabled(true);
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 50; i++) {
             fastScrollEditText.append(i + "刷机的手机点击圣诞节\n");
         }
     }

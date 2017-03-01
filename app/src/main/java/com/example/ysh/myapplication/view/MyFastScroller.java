@@ -18,7 +18,6 @@ import com.example.ysh.myapplication.R;
  */
 
 public class MyFastScroller {
-    private static final String TAG = MyFastScroller.class.getSimpleName();
     private static final int STATE_HIDE = 0;
     private static final int STATE_VISIBLE = 1;
     private static final int STATE_DRAG = 2;
@@ -27,9 +26,8 @@ public class MyFastScroller {
     private Drawable mThumbDrawable;
     private int mThumbW;
     private int mThumbH;
-    private int mState;
-    private long mLong;
-    private int mOffset;
+    private int mState = STATE_HIDE;
+    private float mTouchDownY;
 
     public MyFastScroller(FastScrollEditText fastScrollEditText) {
         mEditText = fastScrollEditText;
@@ -38,6 +36,7 @@ public class MyFastScroller {
 
     private void init(Context context) {
         mThumbDrawable = context.getResources().getDrawable(R.drawable.scrollbar_handle_accelerated_anim2);
+        mThumbDrawable.setAlpha(200);
         mThumbW = context.getResources().getDimensionPixelSize(R.dimen.fast_scrollbar_width);
         mThumbH = context.getResources().getDimensionPixelSize(R.dimen.fast_scrollbar_height);
     }
@@ -49,69 +48,30 @@ public class MyFastScroller {
         mThumbDrawable.draw(canvas);
     }
 
-    void onScrollChanged(int horiz, int vert, int oldHoriz, int oldVert) {
-        mOffset = vert - oldVert;
-        if (mState == STATE_DRAG) {
-            return;
-        }
-        changeScrollState(STATE_VISIBLE);
+    void onScrollChanged() {
+        changeScrollState();
     }
 
     void onSizeChanged() {
-        if (mState == STATE_DRAG) {
-            return;
-        }
-        changeScrollState(STATE_VISIBLE);
+        changeScrollState();
     }
 
-    public void changeScrollState(int state) {
+    private void changeScrollState() {
         int totalHeight = mEditText.getLayout().getHeight();
         int visibleHeight = mEditText.getVisibleHeight();
         if (totalHeight > visibleHeight) {
             int visibleWidth = mEditText.getWidth();
-            int scrollY = mEditText.getScrollY();
-            float percent = 1.0f * scrollY / (totalHeight - visibleHeight);
-            int thumbY = (int) (percent * totalHeight);
-//
-//            if (thumbY < totalHeight / 2) {
-//                mThumbDrawable.setBounds(visibleWidth - mThumbW, thumbY, visibleWidth, thumbY + mThumbH);
-//            }
-//            if (thumbY < totalHeight / 2 + mThumbH) {
-//                mThumbDrawable.setBounds(visibleWidth - mThumbW, scrollY + (int) (1.0f * scrollY / totalHeight * visibleHeight), visibleWidth, scrollY + (int) (1.0f * scrollY / totalHeight * visibleHeight) + mThumbH);
-//            } else {
-//                mThumbDrawable.setBounds(visibleWidth - mThumbW, thumbY - mThumbH, visibleWidth, thumbY);
-//            }
-//            if (thumbY > scrollY + visibleHeight - mThumbH) {
-//                thumbY = scrollY + visibleHeight - mThumbH;
-//            }
-//            mThumbDrawable.setBounds(visibleWidth - mThumbW, thumbY, visibleWidth, thumbY + mThumbH);
-//
-            int offset = totalHeight - visibleHeight - scrollY;
-            double a = 0;
-            if (offset == 0) {
-                a = 100000;
-            } else {
-                a = (1.0 * scrollY / (totalHeight - visibleHeight - scrollY));
-            }
-            int b = visibleHeight - mThumbH;
-            int x = (int)((a * b) / (1 + a));
-            if (x < 1) {
-                 x = 0;
-            }
-            thumbY = scrollY + x;
-            System.out.println("====scrollY:" + scrollY);
-            System.out.println("====totalHeight:" + totalHeight);
-            System.out.println("====visibleHeight:" + visibleHeight);
-            System.out.println("====totalHeight - visibleHeight - scrollY:" + (totalHeight - visibleHeight - scrollY));
-            System.out.println("====a:" + a);
-            System.out.println("====b:" + b);
-            System.out.println("====x:" + x);
-            System.out.println("====thumbY:" + thumbY);
-            mThumbDrawable.setBounds(visibleWidth - mThumbW, thumbY, visibleWidth, thumbY + mThumbH);
 
-            mState = state;
-        } else {
-            mState = STATE_HIDE;
+            int scrollY = mEditText.getScrollY();
+            int hideHeight = totalHeight - visibleHeight;
+            float percent = (1.0f * scrollY / hideHeight);
+            int totalOffset = visibleHeight - mThumbH;
+            int offset = (int) (percent * totalOffset);
+            int thumbY = scrollY + offset;
+            mThumbDrawable.setBounds(visibleWidth - mThumbW, thumbY, visibleWidth, thumbY + mThumbH);
+            if (mState == STATE_HIDE) {
+                mState = STATE_VISIBLE;
+            }
         }
     }
 
@@ -128,36 +88,21 @@ public class MyFastScroller {
 
     private boolean isPointInside(float x, float y) {
         Rect rect = mThumbDrawable.getBounds();
-//        System.out.println("====x:" + x + ",y:" + y);
-//        System.out.println("====rect:" + rect.toShortString());
-//        System.out.println("====mEditText.getScrollY():" + mEditText.getScrollY());
         return (x > rect.left) && (y > rect.top - mEditText.getScrollY()) && (y < rect.bottom - mEditText.getScrollY());
     }
 
     boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
+        switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-                mLong = System.currentTimeMillis();
-                System.out.println("====ACTION_DOWN");
+                mTouchDownY = event.getY();
+                System.out.println("====DOWN event.getY()=" + event.getY());
                 break;
             case MotionEvent.ACTION_MOVE:
-                System.out.println("====ACTION_MOVE");
-
-                System.out.println("====motionEvent.getY()=" + event.getY());
-                System.out.println("====mEditText.getHeight()=" + mEditText.getHeight());
-
-                long current = System.currentTimeMillis();
-                System.out.println("====current=" + current);
-                System.out.println("====mLong=" + mLong);
-                if (current - mLong > 30L) {
-                    float percent = 1.0f * event.getY() / mEditText.getHeight();
-                    scrollTo(percent);
-                    setDrawPos(percent);
-                    mLong = current;
-                }
+                System.out.println("====MOVE event.getY()=" + event.getY());
+                scrollTo(event);
                 break;
             case MotionEvent.ACTION_UP:
-                System.out.println("====ACTION_UP");
+                System.out.println("====UP event.getY()=" + event.getY());
                 mState = STATE_VISIBLE;
                 break;
             default:
@@ -166,36 +111,26 @@ public class MyFastScroller {
         return true;
     }
 
-    private void setDrawPos(float percent) {
-        int scrollY = mEditText.getScrollY();
-        System.out.println("====scrollY=" + scrollY);
-        int visibleWidth = mEditText.getWidth();
-        int visibleHeight = mEditText.getHeight();
-        int totalHeight = mEditText.getLayout().getHeight();
-        int thumbY = scrollY + (int) (percent * visibleHeight);
-        int offset = mThumbH / 2;
-        if (thumbY < offset) {
-            thumbY = offset;
-        } else if (thumbY > totalHeight - offset) {
-            thumbY = totalHeight - offset;
+    private void scrollTo(MotionEvent event) {
+        float move = mTouchDownY - event.getY();
+        if (Math.abs(move) > 10f) {
+            return;
         }
-        mThumbDrawable.setBounds(visibleWidth - mThumbW, thumbY - offset, visibleWidth, thumbY + offset);
-    }
-
-    private void scrollTo(float percent) {
+        int totalHeight = mEditText.getLayout().getHeight();
+        int visibleHeight = mEditText.getVisibleHeight();
+        float percent = event.getY() / visibleHeight;
         if (percent > 1) {
             percent = 1;
         } else if (percent < 0) {
             percent = 0;
         }
+        int scrollY = (int) (percent * (totalHeight - visibleHeight));
+        mEditText.scrollTo(0, scrollY);
+
         int lineCount = mEditText.getLineCount();
         int targetLine = (int) (percent * lineCount);
-        System.out.println("====percent=" + percent);
-        System.out.println("====lineCount=" + lineCount);
-        System.out.println("====targetLine=" + targetLine);
         mEditText.moveToLine(targetLine);
     }
-
 
     void stop() {
 
