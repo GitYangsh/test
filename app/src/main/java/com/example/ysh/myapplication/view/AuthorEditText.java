@@ -8,7 +8,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.EditText;
 
 import java.util.LinkedList;
 
@@ -20,7 +19,7 @@ import java.util.LinkedList;
  *         Description:
  */
 
-public class AuthorEditText extends EditText implements FastEditBar.OnFastEditClickListener {
+public class AuthorEditText extends FastScrollEditText implements FastEditBar.OnFastEditClickListener {
 
     private static final String TAG = AuthorEditText.class.getSimpleName();
     private static final String SYMBOL_INDENT = "\u3000\u3000";
@@ -70,6 +69,7 @@ public class AuthorEditText extends EditText implements FastEditBar.OnFastEditCl
 
     private void init() {
         mEditable = getText();
+        setFastScrollEnabled(true);
 
         setOnKeyListener(new OnKeyListener() {
             @Override

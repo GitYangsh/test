@@ -34,6 +34,7 @@ public class FastScroller {
     private int mState = STATE_NONE;
     private float mTouchDownY;
     private AnimatorSet mHideAnimSet = new AnimatorSet();
+    private boolean mIsHide;
 
     public FastScroller(FastScrollEditText fastScrollEditText) {
         mEditText = fastScrollEditText;
@@ -99,6 +100,8 @@ public class FastScroller {
             if (mState == STATE_NONE || mState == STATE_HIDE) {
                 setState(STATE_VISIBLE);
             }
+        } else {
+            setState(STATE_NONE);
         }
     }
 
@@ -122,7 +125,6 @@ public class FastScroller {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mTouchDownY = event.getY();
-                stopAnim();
                 break;
             case MotionEvent.ACTION_MOVE:
                 scrollTo(event);
@@ -159,14 +161,18 @@ public class FastScroller {
 
     private void setState(int state) {
         switch (state) {
+            case STATE_NONE:
+                if (!mIsHide) {
+                    startHideAnim();
+                }
             case STATE_HIDE:
-                startAnim();
+                startHideAnim();
                 break;
             case STATE_VISIBLE:
-                stopAnim();
+                stopHideAnim();
                 break;
             case STATE_DRAG:
-                stopAnim();
+                stopHideAnim();
                 break;
             default:
                 break;
@@ -179,19 +185,21 @@ public class FastScroller {
     }
 
     void stop() {
-        stopAnim();
+        stopHideAnim();
     }
 
-    private void startAnim() {
+    private void startHideAnim() {
         if (!mHideAnimSet.isStarted() && !mHideAnimSet.isRunning()) {
             mHideAnimSet.start();
+            mIsHide = true;
         }
     }
 
-    private void stopAnim() {
+    private void stopHideAnim() {
         if (mHideAnimSet.isStarted() || mHideAnimSet.isRunning()) {
             mHideAnimSet.cancel();
         }
+        mIsHide = false;
         mThumbDrawable.setAlpha(DEFAULT_ALPHA);
     }
 }
