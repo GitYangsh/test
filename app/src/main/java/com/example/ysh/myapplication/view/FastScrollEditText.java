@@ -16,7 +16,7 @@ import android.widget.EditText;
  */
 
 public class FastScrollEditText extends EditText {
-    private MyFastScroller mFastScroller;
+    private FastScroller mFastScroller;
 
     public FastScrollEditText(Context context) {
         super(context);
@@ -75,7 +75,7 @@ public class FastScrollEditText extends EditText {
     public void setFastScrollEnabled(boolean enabled) {
         if (enabled) {
             if (mFastScroller == null) {
-                mFastScroller = new MyFastScroller(this);
+                mFastScroller = new FastScroller(this);
             }
         } else {
             mFastScroller.stop();
