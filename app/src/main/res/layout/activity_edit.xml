@@ -56,5 +56,6 @@
         app:tabMode="fixed"
         app:tabSelectedTextColor="@color/colorTextHint"
         app:tabTextColor="@color/colorTextHint"
+        android:visibility="gone"
         />
 </LinearLayout>
