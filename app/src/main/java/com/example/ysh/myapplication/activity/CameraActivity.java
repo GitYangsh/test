@@ -15,6 +15,7 @@ import android.view.Surface;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ysh.myapplication.R;
 import com.example.ysh.myapplication.view.CameraPreview;
@@ -24,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -54,26 +56,21 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
         mCameraInfoTv = (TextView) findViewById(R.id.camera_info_tv);
 
+        if (checkCameraHardware(this)) {
+            mCamera = getCameraInstance();
+            if (mCamera == null) {
+                Log.e("Camera", "mCamera is null");
+                return;
+            }
+            mPreview = new CameraPreview(this, mCamera);
+            FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+            preview.addView(mPreview);
 
-        mCamera = getCameraInstance();
-        setCameraDisplayOrientation(this, 0, mCamera);
-        // Create our Preview view and set it as the content of our activity.
-        mPreview = new CameraPreview(this, mCamera);
-        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-        preview.addView(mPreview);
-
-        Camera.Parameters parameters = mCamera.getParameters();
-        List<Camera.Size> previewSizes = parameters.getSupportedPreviewSizes();
-        List<Camera.Size> pictureSizes = parameters.getSupportedPictureSizes();
-        Camera.Size selectSize = selectCameraSize(previewSizes, pictureSizes);
-        parameters.setPreviewSize(selectSize.width, selectSize.height);
-        parameters.setPictureSize(selectSize.width, selectSize.height);
-//        System.out.println("----parameters=" + parameters);
-//        System.out.println("----previewSizes");
-//        printCameraSize(previewSizes);
-//        System.out.println("----pictureSizes");
-//        printCameraSize(pictureSizes);
-        mCamera.setParameters(parameters);
+            setCameraDisplayOrientation(this, 0, mCamera);
+            setCameraDisplaySize(mCamera);
+        } else {
+            Toast.makeText(this, "no camera on this device", Toast.LENGTH_SHORT).show();
+        }
 
     }
 
@@ -105,13 +102,42 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         return c; // returns null if camera is unavailable
     }
 
-    public void setCameraDisplayOrientation(Activity activity,
-                                            int cameraId, android.hardware.Camera camera) {
-        android.hardware.Camera.CameraInfo info =
-                new android.hardware.Camera.CameraInfo();
-        android.hardware.Camera.getCameraInfo(cameraId, info);
-        int rotation = activity.getWindowManager().getDefaultDisplay()
-                .getRotation();
+    private void setCameraDisplaySize(Camera camera) {
+        List<Camera.Size> sizes = getSupportSizes(camera);
+        if (sizes.size() == 0) {
+            return;
+        }
+        Camera.Size selectSize = sizes.get(0);
+        Camera.Parameters parameters = camera.getParameters();
+        parameters.setPreviewSize(selectSize.width, selectSize.height);
+        parameters.setPictureSize(selectSize.width, selectSize.height);
+        mCamera.setParameters(parameters);
+    }
+
+    private List<Camera.Size> getSupportSizes(Camera camera) {
+        List<Camera.Size> sizes = new ArrayList<>();
+
+        Camera.Parameters parameters = camera.getParameters();
+        List<Camera.Size> previewSizes = parameters.getSupportedPreviewSizes();
+        List<Camera.Size> pictureSizes = parameters.getSupportedPictureSizes();
+        for (int i = 0; i < previewSizes.size(); i++) {
+            Camera.Size previewSize = previewSizes.get(i);
+            for (int j = 0; j < pictureSizes.size(); j++) {
+                if (previewSize.equals(pictureSizes.get(j))) {
+                    sizes.add(previewSize);
+                }
+            }
+        }
+        return sizes;
+    }
+
+    public void setCameraDisplayOrientation(Activity activity, int cameraId, Camera camera) {
+        if (camera == null) {
+            return;
+        }
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        Camera.getCameraInfo(cameraId, info);
+        int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
         int degrees = 0;
         switch (rotation) {
             case Surface.ROTATION_0:
@@ -134,7 +160,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         } else {  // back-facing
             result = (info.orientation - degrees + 360) % 360;
         }
-        Camera.Parameters parameters = mCamera.getParameters();
+        Camera.Parameters parameters = camera.getParameters();
         parameters.setRotation(result);
         camera.setParameters(parameters);
         camera.setDisplayOrientation(result);
@@ -172,6 +198,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         super.onDestroy();
         if (mCamera != null) {
             mCamera.release();
+            mCamera = null;
         }
     }
 
@@ -224,13 +251,17 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
 
-    /** Create a file Uri for saving an image or video */
-    private static Uri getOutputMediaFileUri(int type){
+    /**
+     * Create a file Uri for saving an image or video
+     */
+    private static Uri getOutputMediaFileUri(int type) {
         return Uri.fromFile(getOutputMediaFile(type));
     }
 
-    /** Create a File for saving an image or video */
-    private static File getOutputMediaFile(int type){
+    /**
+     * Create a File for saving an image or video
+     */
+    private static File getOutputMediaFile(int type) {
         // To be safe, you should check that the SDCard is mounted
         // using Environment.getExternalStorageState() before doing this.
 
@@ -240,8 +271,8 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         // between applications and persist after your app has been uninstalled.
 
         // Create the storage directory if it does not exist
-        if (! mediaStorageDir.exists()){
-            if (! mediaStorageDir.mkdirs()){
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
                 Log.d("MyCameraApp", "failed to create directory");
                 return null;
             }
@@ -250,12 +281,12 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         // Create a media file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         File mediaFile;
-        if (type == MEDIA_TYPE_IMAGE){
+        if (type == MEDIA_TYPE_IMAGE) {
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "IMG_"+ timeStamp + ".jpg");
-        } else if(type == MEDIA_TYPE_VIDEO) {
+                    "IMG_" + timeStamp + ".jpg");
+        } else if (type == MEDIA_TYPE_VIDEO) {
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "VID_"+ timeStamp + ".mp4");
+                    "VID_" + timeStamp + ".mp4");
         } else {
             return null;
         }
