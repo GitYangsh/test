@@ -10,7 +10,6 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.example.ysh.myapplication.R;
-import com.example.ysh.myapplication.view.FastScrollEditText;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,22 +26,13 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         data.add("NumberProgressBar");
         data.add("Edit");
         data.add("Read");
+        data.add("Camera");
 
         MainRecyclerViewAdapter adapter = new MainRecyclerViewAdapter(this, data);
         adapter.setOnChildClickerListener(this);
         recyclerView.setAdapter(adapter);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(linearLayoutManager);
-
-
-        FastScrollEditText fastScrollEditText = (FastScrollEditText) findViewById(R.id.edit_text);
-        fastScrollEditText.setFastScrollEnabled(true);
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 50; i++) {
-            sb.append(i + "刷机的手机点击圣诞节\n");
-        }
-        fastScrollEditText.setText(sb.toString());
-        fastScrollEditText.setSelection(fastScrollEditText.getText().length());
     }
 
 
@@ -81,6 +71,9 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
                 break;
             case 2:
                 startActivity(new Intent(this, ReadActivity.class));
+                break;
+            case 3:
+                startActivity(new Intent(this, CameraActivity.class));
                 break;
             default:
                 break;

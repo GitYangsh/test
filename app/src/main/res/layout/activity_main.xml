@@ -14,12 +14,4 @@
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
-
-    <com.example.ysh.myapplication.view.FastScrollEditText
-        android:id="@+id/edit_text"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="top|start"
-        android:lineSpacingMultiplier="1.2"
-        android:background="@color/colorPrimary"/>
 </LinearLayout>
