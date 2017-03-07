@@ -3,16 +3,24 @@ package com.example.ysh.myapplication.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.hardware.Camera;
+import android.media.CamcorderProfile;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.Surface;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,40 +46,74 @@ import java.util.List;
  *          Description:
  */
 
-public class CameraActivity extends AppCompatActivity implements View.OnClickListener {
+public class CameraActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
     private static final String TAG = "CameraActivity";
+    public static final int MEDIA_TYPE_IMAGE = 1;
+    public static final int MEDIA_TYPE_VIDEO = 2;
 
-    TextView mCameraInfoTv;
+    private static final int[] FLASH_OPTIONS = {
+
+    };
+
+    private static final int[] FLASH_ICONS = {
+            R.drawable.ic_flash_auto,
+            R.drawable.ic_flash_off,
+            R.drawable.ic_flash_on,
+    };
+
+    private static final int[] FLASH_TITLES = {
+            R.string.flash_auto,
+            R.string.flash_off,
+            R.string.flash_on,
+    };
+
     Camera mCamera;
     CameraPreview mPreview;
+    MediaRecorder mRecorder;
+    CountDownTimer mCountDownTimer;
+    TextView mTimeTextView;
+    CheckBox mVideoCheckBox;
+    FrameLayout mCameraView;
+    int mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
 
-        findViewById(R.id.camera_check_btn).setOnClickListener(this);
-        findViewById(R.id.camera_open_btn).setOnClickListener(this);
-        findViewById(R.id.camera_release_btn).setOnClickListener(this);
+        findViewById(R.id.camera).setOnClickListener(this);
+        mVideoCheckBox = (CheckBox) findViewById(R.id.video);
+        mVideoCheckBox.setOnCheckedChangeListener(this);
+        mTimeTextView = (TextView) findViewById(R.id.video_time);
+        mCameraView = (FrameLayout) findViewById(R.id.camera_preview);
 
-        mCameraInfoTv = (TextView) findViewById(R.id.camera_info_tv);
-
-        if (checkCameraHardware(this)) {
-            mCamera = getCameraInstance();
-            if (mCamera == null) {
-                Log.e("Camera", "mCamera is null");
-                return;
-            }
-            mPreview = new CameraPreview(this, mCamera);
-            FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-            preview.addView(mPreview);
-
-            setCameraDisplayOrientation(this, 0, mCamera);
-            setCameraDisplaySize(mCamera);
-        } else {
-            Toast.makeText(this, "no camera on this device", Toast.LENGTH_SHORT).show();
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowTitleEnabled(false);
         }
 
+        mTimeTextView.setText("03:00");
+        mCountDownTimer = new CountDownTimer(3000, 10) {
+
+            public void onTick(long millisUntilFinished) {
+                long first = millisUntilFinished / 10000;
+                long second = millisUntilFinished % 10000 / 1000;
+                long third = millisUntilFinished % 1000 / 100;
+                long four = millisUntilFinished % 100/ 10;
+
+                mTimeTextView.setText(first + "" + second + ":" + third + "" + four);
+            }
+
+            public void onFinish() {
+                stopRecording();
+                mTimeTextView.setText("00:00");
+                mVideoCheckBox.setChecked(false);
+                mVideoCheckBox.setEnabled(true);
+                Toast.makeText(CameraActivity.this, "video finish", Toast.LENGTH_SHORT).show();
+            }
+        };
     }
 
     /**
@@ -87,13 +129,46 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
+    private void initCamera(int cameraId) {
+        mCamera = getCameraInstance(cameraId);
+        if (mCamera == null) {
+            Log.e("Camera", "mCamera is null");
+            return;
+        }
+        mPreview = new CameraPreview(this, mCamera);
+        mCameraView.addView(mPreview);
+
+        setCameraDisplayOrientation(this, cameraId, mCamera);
+        setCameraDisplaySize(mCamera);
+    }
+
+    private void releaseCamera(){
+        if (mCamera != null) {
+            mCamera.release();
+            mCamera = null;
+        }
+        if (mPreview != null) {
+            mCameraView.removeView(mPreview);
+            mPreview = null;
+        }
+    }
+
+    private void releaseMediaRecorder(){
+        if (mRecorder != null) {
+            mRecorder.reset();
+            mRecorder.release();
+            mRecorder = null;
+            mCamera.lock();
+        }
+    }
+
     /**
      * A safe way to get an instance of the Camera object.
      */
-    public Camera getCameraInstance() {
+    public Camera getCameraInstance(int cameraId) {
         Camera c = null;
         try {
-            c = Camera.open(); // attempt to get a Camera instance
+            c = Camera.open(cameraId); // attempt to get a Camera instance
         } catch (Exception e) {
             // Camera is not available (in use or does not exist)
             e.printStackTrace();
@@ -109,6 +184,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
         }
         Camera.Size selectSize = sizes.get(0);
         Camera.Parameters parameters = camera.getParameters();
+        parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
         parameters.setPreviewSize(selectSize.width, selectSize.height);
         parameters.setPictureSize(selectSize.width, selectSize.height);
         mCamera.setParameters(parameters);
@@ -125,6 +201,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             for (int j = 0; j < pictureSizes.size(); j++) {
                 if (previewSize.equals(pictureSizes.get(j))) {
                     sizes.add(previewSize);
+                    printCameraSize(previewSize);
                 }
             }
         }
@@ -132,9 +209,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     public void setCameraDisplayOrientation(Activity activity, int cameraId, Camera camera) {
-        if (camera == null) {
-            return;
-        }
         Camera.CameraInfo info = new Camera.CameraInfo();
         Camera.getCameraInfo(cameraId, info);
         int rotation = activity.getWindowManager().getDefaultDisplay().getRotation();
@@ -154,32 +228,27 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
                 break;
         }
         int result;
+        int cameraRotation;
         if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
             result = (info.orientation + degrees) % 360;
+            cameraRotation = result;
             result = (360 - result) % 360;  // compensate the mirror
         } else {  // back-facing
             result = (info.orientation - degrees + 360) % 360;
+            cameraRotation = result;
         }
-        Camera.Parameters parameters = camera.getParameters();
-        parameters.setRotation(result);
-        camera.setParameters(parameters);
+
         camera.setDisplayOrientation(result);
+        Camera.Parameters parameters = camera.getParameters();
+        parameters.setRotation(cameraRotation);
+        camera.setParameters(parameters);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.camera_check_btn:
-                StringBuilder sb = new StringBuilder();
-                sb.append("相机状态\n");
-                sb.append("是否可用：" + checkCameraHardware(this) + "\n");
-                sb.append("相机个数：" + Camera.getNumberOfCameras() + "\n");
-                mCameraInfoTv.setText(sb.toString());
-                break;
-            case R.id.camera_open_btn:
+            case R.id.camera:
                 mCamera.takePicture(null, null, mPicture);
-                break;
-            case R.id.camera_release_btn:
                 break;
             default:
                 break;
@@ -187,19 +256,113 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        switch (buttonView.getId()) {
+            case R.id.video:
+                if (isChecked) {
+                    buttonView.setEnabled(false);
+                    mTimeTextView.setText("03:00");
+                    mCountDownTimer.start();
+                    startRecording();
+                    Toast.makeText(CameraActivity.this, "video start", Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
+    }
 
-        setCameraDisplayOrientation(this, 0, mCamera);
+    private void startRecording() {
+        mRecorder = new MediaRecorder();
+        mCamera.unlock();
+        mRecorder.setCamera(mCamera);
+        mRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+        mRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+        mRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_720P));
+
+        mRecorder.setOutputFile(getOutputMediaFile(MEDIA_TYPE_VIDEO).getPath());
+        mRecorder.setPreviewDisplay(mPreview.getHolder().getSurface());
+        try {
+            mRecorder.prepare();
+        } catch (IOException e) {
+            releaseMediaRecorder();
+            Log.e(TAG, "prepare() failed");
+        }
+
+        mRecorder.start();
+    }
+
+    private void stopRecording() {
+        mRecorder.stop();
+        mRecorder.reset();
+        mRecorder.release();
+        mRecorder = null;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (checkCameraHardware(this)) {
+            initCamera(mCameraId);
+        } else {
+            Toast.makeText(this, "no camera on this device", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        releaseMediaRecorder();
+        releaseCamera();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mCamera != null) {
-            mCamera.release();
-            mCamera = null;
+        releaseMediaRecorder();
+        releaseCamera();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.camera, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.aspect_ratio:
+                if (mCameraView != null) {
+//                    final Set<AspectRatio> ratios = mCameraView.getSupportedAspectRatios();
+//                    final AspectRatio currentRatio = mCameraView.getAspectRatio();
+//                    AspectRatioFragment.newInstance(ratios, currentRatio)
+//                            .show(getSupportFragmentManager(), FRAGMENT_DIALOG);
+                }
+                break;
+            case R.id.switch_flash:
+                if (mCameraView != null) {
+//                    mCurrentFlash = (mCurrentFlash + 1) % FLASH_OPTIONS.length;
+//                    item.setTitle(FLASH_TITLES[mCurrentFlash]);
+//                    item.setIcon(FLASH_ICONS[mCurrentFlash]);
+//                    mCameraView.setFlash(FLASH_OPTIONS[mCurrentFlash]);
+                }
+                break;
+            case R.id.switch_camera:
+                if (mCameraView != null) {
+                    Camera.CameraInfo info = new Camera.CameraInfo();
+                    Camera.getCameraInfo(mCameraId, info);
+                    releaseMediaRecorder();
+                    releaseCamera();
+                    if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                        mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
+                        initCamera(mCameraId);
+                    } else {
+                        mCameraId = Camera.CameraInfo.CAMERA_FACING_FRONT;
+                        initCamera(mCameraId);
+                    }
+                }
+                break;
         }
+        return false;
     }
 
     private void printCameraSize(List<Camera.Size> sizes) {
@@ -210,19 +373,6 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
 
     private void printCameraSize(Camera.Size size) {
         System.out.println(size.width + " x " + size.height);
-    }
-
-    private Camera.Size selectCameraSize(List<Camera.Size> previewSizes, List<Camera.Size> pictureSizes) {
-        for (int i = 0; i < previewSizes.size(); i++) {
-            Camera.Size previewSize = previewSizes.get(i);
-            for (int j = 0; j < pictureSizes.size(); j++) {
-                if (previewSize.equals(pictureSizes.get(j))) {
-                    printCameraSize(previewSize);
-                    return previewSize;
-                }
-            }
-        }
-        return null;
     }
 
     private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
@@ -245,11 +395,16 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             } catch (IOException e) {
                 Log.d(TAG, "Error accessing file: " + e.getMessage());
             }
+            Toast.makeText(CameraActivity.this, "take picture sucess", Toast.LENGTH_SHORT).show();
+            camera.startPreview();
+            camera.autoFocus(new Camera.AutoFocusCallback() {
+                @Override
+                public void onAutoFocus(boolean success, Camera camera) {
+                    Log.d("Camera", "autoFocus:" + success);
+                }
+            });
         }
     };
-
-    public static final int MEDIA_TYPE_IMAGE = 1;
-    public static final int MEDIA_TYPE_VIDEO = 2;
 
     /**
      * Create a file Uri for saving an image or video

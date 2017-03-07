@@ -42,6 +42,12 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             System.out.println("-----surfaceCreated");
             mCamera.setPreviewDisplay(holder);
             mCamera.startPreview();
+            mCamera.autoFocus(new Camera.AutoFocusCallback() {
+                @Override
+                public void onAutoFocus(boolean success, Camera camera) {
+                    Log.d("Camera", "autoFocus:" + success);
+                }
+            });
         } catch (IOException e) {
             Log.d(TAG, "Error setting camera preview: " + e.getMessage());
         }
@@ -49,6 +55,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     public void surfaceDestroyed(SurfaceHolder holder) {
         System.out.println("-----surfaceDestroyed");
+        mCamera = null;
         // empty. Take care of releasing the Camera preview in your activity.
     }
 
@@ -58,7 +65,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         System.out.println("-----surfaceChanged");
         if (mHolder.getSurface() == null){
             // preview surface does not exist
-            System.out.println("-----mHolder.getSurface() == null");
             return;
         }
 
@@ -76,7 +82,12 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         try {
             mCamera.setPreviewDisplay(mHolder);
             mCamera.startPreview();
-
+            mCamera.autoFocus(new Camera.AutoFocusCallback() {
+                @Override
+                public void onAutoFocus(boolean success, Camera camera) {
+                    Log.d("Camera", "autoFocus:" + success);
+                }
+            });
         } catch (Exception e){
             Log.d(TAG, "Error starting camera preview: " + e.getMessage());
         }
