@@ -34,8 +34,10 @@
         <activity
             android:name=".activity.CameraActivity"
             android:screenOrientation="portrait"/>
-        <activity android:name=".activity.CameraGLSerfaceActivity"
+        <activity android:name=".activity.CameraGLSurfaceActivity"
             android:screenOrientation="portrait"/>
+        <activity android:name=".activity.OpenGLActivity"
+                  android:screenOrientation="portrait"/>
     </application>
 
 </manifest>
