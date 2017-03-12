@@ -1,6 +1,10 @@
 package com.example.ysh.myapplication.view;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.GLES11Ext;
@@ -44,6 +48,9 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     private int mHeight;
     private int mTextureName;
     private Square mSquare;
+    private boolean isTakePic;
+    private ByteBuffer mCaptureBuffer;
+    private Bitmap mBitmap;
 
     public CameraGLSurfaceView(Activity activity) {
         super(activity);
@@ -74,6 +81,8 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         mWidth = width;
         mHeight = height;
         GLES20.glViewport(0, 0, width, height);
+        mCaptureBuffer = ByteBuffer.allocate(mWidth * mHeight * 4);
+        mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
 
         if (getHolder().getSurface() == null) {
             // preview surface does not exist
@@ -97,11 +106,87 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     @Override
     public void onDrawFrame(GL10 gl) {
-        System.out.println("onDrawFrame");
+//        System.out.println("onDrawFrame");
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
         mSurfaceTexture.updateTexImage();
         mSquare.draw();
+
+        if (isTakePic) {
+            mCaptureBuffer.rewind();
+            GLES20.glReadPixels(0, 0, mWidth, mHeight, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE,
+                    mCaptureBuffer);
+            isTakePic = false;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    mCaptureBuffer.rewind();
+                    mBitmap.copyPixelsFromBuffer(mCaptureBuffer);
+                    mBitmap = adjustPhotoRotation1(mBitmap, 180);
+                    try {
+                        FileOutputStream fos = new FileOutputStream("/sdcard/screen.jpg");//注意app的sdcard读写权限问题
+                        mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);//压缩成png,100%显示效果
+                        fos.flush();
+                        fos.close();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
+        Toast.makeText(mActivity, "take picture success", Toast.LENGTH_SHORT).show();
+    }
+
+    Bitmap adjustPhotoRotation1(Bitmap bm, final int orientationDegree) {
+
+        Matrix m = new Matrix();
+        m.setRotate(orientationDegree, (float) bm.getWidth() / 2, (float) bm.getHeight() / 2);
+
+        try {
+            Bitmap bm1 = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), m, true);
+
+            return bm1;
+
+        } catch (OutOfMemoryError ex) {
+        }
+
+        return null;
+
+    }
+
+    Bitmap adjustPhotoRotation(Bitmap bm, final int orientationDegree) {
+
+        Matrix m = new Matrix();
+        m.setRotate(orientationDegree, (float) bm.getWidth() / 2, (float) bm.getHeight() / 2);
+        float targetX, targetY;
+        if (orientationDegree == 90) {
+            targetX = bm.getHeight();
+            targetY = 0;
+        } else {
+            targetX = bm.getHeight();
+            targetY = bm.getWidth();
+        }
+
+        final float[] values = new float[9];
+        m.getValues(values);
+
+        float x1 = values[Matrix.MTRANS_X];
+        float y1 = values[Matrix.MTRANS_Y];
+
+        m.postTranslate(targetX - x1, targetY - y1);
+
+        Bitmap bm1 = Bitmap.createBitmap(bm.getHeight(), bm.getWidth(), Bitmap.Config.ARGB_8888);
+
+        Paint paint = new Paint();
+        Canvas canvas = new Canvas(bm1);
+        canvas.drawBitmap(bm, m, paint);
+
+
+        return bm1;
     }
 
     @Override
@@ -121,10 +206,8 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         CameraUtil.releaseCamera(mCamera);
     }
 
-    public void tackPicture(){
-        if (mSquare != null) {
-            mSquare.takePicture();
-        }
+    public void tackPicture() {
+        isTakePic = true;
     }
 
     private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
@@ -209,12 +292,6 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 -1.0f, -1.0f, 0.0f,   // bottom left
                 1.0f, -1.0f, 0.0f,   // bottom right
                 1.0f, 1.0f, 0.0f}; // top right
-
-        private float shapeCoordsFishEye[] = {
-                -1.0f, 0.5625f, 0.0f,   // top left
-                -1.0f, -0.5625f, 0.0f,   // bottom left
-                1.0f, -0.5625f, 0.0f,   // bottom right
-                1.0f, 0.5625f, 0.0f}; // top right
         //90 degree rotated
         private float textureCoords[] = {
                 0.0f, 1.0f,   // top left
@@ -329,10 +406,6 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
             GLES20.glDisableVertexAttribArray(positionHandler);
             GLES20.glDisableVertexAttribArray(texCoordHandler);
-
-        }
-
-        public void takePicture(){
 
         }
     }

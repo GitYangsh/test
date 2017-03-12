@@ -395,7 +395,7 @@ public class CameraActivity extends AppCompatActivity implements View.OnClickLis
             } catch (IOException e) {
                 Log.d(TAG, "Error accessing file: " + e.getMessage());
             }
-            Toast.makeText(CameraActivity.this, "take picture sucess", Toast.LENGTH_SHORT).show();
+            Toast.makeText(CameraActivity.this, "take picture success", Toast.LENGTH_SHORT).show();
             camera.startPreview();
             camera.autoFocus(new Camera.AutoFocusCallback() {
                 @Override

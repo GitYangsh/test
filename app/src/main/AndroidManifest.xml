@@ -37,7 +37,7 @@
         <activity android:name=".activity.CameraGLSurfaceActivity"
             android:screenOrientation="portrait"/>
         <activity android:name=".activity.OpenGLActivity"
-                  android:screenOrientation="portrait"/>
+                  android:screenOrientation="sensor"/>
     </application>
 
 </manifest>
