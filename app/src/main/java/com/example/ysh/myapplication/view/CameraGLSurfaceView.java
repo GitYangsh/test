@@ -2,21 +2,15 @@ package com.example.ysh.myapplication.view;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.os.Environment;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.example.ysh.myapplication.util.CameraUtil;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,8 +18,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -49,6 +41,7 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
     private int mTextureName;
     private Square mSquare;
     private boolean isTakePic;
+    private boolean isStartRecording;
     private ByteBuffer mCaptureBuffer;
     private Bitmap mBitmap;
 
@@ -138,55 +131,22 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
                 }
             }).start();
         }
-        Toast.makeText(mActivity, "take picture success", Toast.LENGTH_SHORT).show();
+
+        if (isStartRecording) {
+
+        }
+
     }
 
     Bitmap adjustPhotoRotation1(Bitmap bm, final int orientationDegree) {
-
         Matrix m = new Matrix();
         m.setRotate(orientationDegree, (float) bm.getWidth() / 2, (float) bm.getHeight() / 2);
-
         try {
             Bitmap bm1 = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), m, true);
-
             return bm1;
-
         } catch (OutOfMemoryError ex) {
         }
-
         return null;
-
-    }
-
-    Bitmap adjustPhotoRotation(Bitmap bm, final int orientationDegree) {
-
-        Matrix m = new Matrix();
-        m.setRotate(orientationDegree, (float) bm.getWidth() / 2, (float) bm.getHeight() / 2);
-        float targetX, targetY;
-        if (orientationDegree == 90) {
-            targetX = bm.getHeight();
-            targetY = 0;
-        } else {
-            targetX = bm.getHeight();
-            targetY = bm.getWidth();
-        }
-
-        final float[] values = new float[9];
-        m.getValues(values);
-
-        float x1 = values[Matrix.MTRANS_X];
-        float y1 = values[Matrix.MTRANS_Y];
-
-        m.postTranslate(targetX - x1, targetY - y1);
-
-        Bitmap bm1 = Bitmap.createBitmap(bm.getHeight(), bm.getWidth(), Bitmap.Config.ARGB_8888);
-
-        Paint paint = new Paint();
-        Canvas canvas = new Canvas(bm1);
-        canvas.drawBitmap(bm, m, paint);
-
-
-        return bm1;
     }
 
     @Override
@@ -210,68 +170,12 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
         isTakePic = true;
     }
 
-    private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
+    public void startRecording() {
+        isStartRecording = true;
+    }
 
-        @Override
-        public void onPictureTaken(byte[] data, Camera camera) {
-
-            File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
-            if (pictureFile == null) {
-                Log.d(TAG, "Error creating media file, check storage permissions: ");
-                return;
-            }
-
-            try {
-                FileOutputStream fos = new FileOutputStream(pictureFile);
-                fos.write(data);
-                fos.close();
-            } catch (FileNotFoundException e) {
-                Log.d(TAG, "File not found: " + e.getMessage());
-            } catch (IOException e) {
-                Log.d(TAG, "Error accessing file: " + e.getMessage());
-            }
-            Toast.makeText(mActivity, "take picture sucess", Toast.LENGTH_SHORT).show();
-            camera.startPreview();
-            camera.autoFocus(new Camera.AutoFocusCallback() {
-                @Override
-                public void onAutoFocus(boolean success, Camera camera) {
-                    Log.d("Camera", "autoFocus:" + success);
-                }
-            });
-        }
-    };
-
-    private static File getOutputMediaFile(int type) {
-        // To be safe, you should check that the SDCard is mounted
-        // using Environment.getExternalStorageState() before doing this.
-
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "MyCameraApp");
-        // This location works best if you want the created images to be shared
-        // between applications and persist after your app has been uninstalled.
-
-        // Create the storage directory if it does not exist
-        if (!mediaStorageDir.exists()) {
-            if (!mediaStorageDir.mkdirs()) {
-                Log.d("MyCameraApp", "failed to create directory");
-                return null;
-            }
-        }
-
-        // Create a media file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        File mediaFile;
-        if (type == MEDIA_TYPE_IMAGE) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "IMG_" + timeStamp + ".jpg");
-        } else if (type == MEDIA_TYPE_VIDEO) {
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "VID_" + timeStamp + ".mp4");
-        } else {
-            return null;
-        }
-
-        return mediaFile;
+    public void stopRecording() {
+        isStartRecording = false;
     }
 
     private void initCamera(int cameraId) {
