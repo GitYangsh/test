@@ -72,6 +72,16 @@ public class OpenGLActivity extends AppCompatActivity {
             mSquare = new Square();
         }
 
+        public void onSurfaceChanged(GL10 unused, int width, int height) {
+            System.out.println("onSurfaceChanged:width=" + width + ",height=" + height);
+            GLES20.glViewport(0, 0, width, height);
+
+            float ratio = (float) width / height;
+            // this projection matrix is applied to object coordinates
+            // in the onDrawFrame() method
+            Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+        }
+
         public void onDrawFrame(GL10 unused) {
             // Redraw background color
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
@@ -87,16 +97,6 @@ public class OpenGLActivity extends AppCompatActivity {
 
 //            mTriangle.draw();
 //            mSquare.draw();
-        }
-
-        public void onSurfaceChanged(GL10 unused, int width, int height) {
-            System.out.println("onSurfaceChanged:width=" + width + ",height=" + height);
-            GLES20.glViewport(0, 0, width, height);
-
-            float ratio = (float) width / height;
-            // this projection matrix is applied to object coordinates
-            // in the onDrawFrame() method
-            Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
         }
     }
 

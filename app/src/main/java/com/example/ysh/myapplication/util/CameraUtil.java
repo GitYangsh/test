@@ -15,7 +15,7 @@ import java.util.List;
  */
 
 public class CameraUtil {
-
+    private static final String TAG = "CameraUtil";
     /**
      * Check if this device has a camera
      */
@@ -47,7 +47,6 @@ public class CameraUtil {
     public static void releaseCamera(Camera camera){
         if (camera != null) {
             camera.release();
-            camera = null;
         }
     }
 
@@ -115,5 +114,49 @@ public class CameraUtil {
             }
         }
         return sizes;
+    }
+
+    public static void setFocusMode(Camera camera, String mode) {
+        Camera.Parameters params = camera.getParameters();
+        final List<String> focusModes = params.getSupportedFocusModes();
+        if (focusModes.contains(mode)) {
+            params.setFocusMode(mode);
+        } else {
+            LogUtils.i(TAG, "Camera does not support mode");
+        }
+        camera.setParameters(params);
+    }
+
+    public static void setFocusModeVideo(Camera camera) {
+        Camera.Parameters params = camera.getParameters();
+        final List<String> focusModes = params.getSupportedFocusModes();
+        if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
+            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+        } else {
+            LogUtils.i(TAG, "Camera does not support " + Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+        }
+        camera.setParameters(params);
+    }
+
+    public static void setFocusModePicture(Camera camera) {
+        Camera.Parameters params = camera.getParameters();
+        final List<String> focusModes = params.getSupportedFocusModes();
+        if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+        } else {
+            LogUtils.i(TAG, "Camera does not support " + Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+        }
+        camera.setParameters(params);
+    }
+
+    public static void setFocusModeAuto(Camera camera) {
+        Camera.Parameters params = camera.getParameters();
+        final List<String> focusModes = params.getSupportedFocusModes();
+        if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+            params.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+        } else {
+            LogUtils.i(TAG, "Camera does not support " + Camera.Parameters.FOCUS_MODE_AUTO);
+        }
+        camera.setParameters(params);
     }
 }

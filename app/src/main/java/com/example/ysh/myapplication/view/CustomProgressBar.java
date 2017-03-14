@@ -160,7 +160,7 @@ public class CustomProgressBar extends View {
         }
     }
 
-    private void setProgress(int progress) {
+    public void setProgress(int progress) {
         if (progress >= 0 && progress <= mMax) {
             mProgress = progress;
             invalidate();

@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         data.add("Camera");
         data.add("Camera GLSurface");
         data.add("OpenGL");
+        data.add("Short Video");
 
         MainRecyclerViewAdapter adapter = new MainRecyclerViewAdapter(this, data);
         adapter.setOnChildClickerListener(this);
@@ -83,6 +84,8 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
             case 5:
                 startActivity(new Intent(this, OpenGLActivity.class));
                 break;
+            case 6:
+                startActivity(new Intent(this, ShortVideoActivity.class));
             default:
                 break;
         }
