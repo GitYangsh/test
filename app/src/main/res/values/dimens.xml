@@ -5,4 +5,10 @@
 
     <dimen name="fast_scrollbar_width">42dip</dimen>
     <dimen name="fast_scrollbar_height">48dip</dimen>
+
+    <dimen name="video_preview_width">100dp</dimen>
+    <dimen name="video_preview_height">56dp</dimen>
+    <dimen name="video_frame_width">2dp</dimen>
+
+    <bool name="landscape">false</bool>
 </resources>

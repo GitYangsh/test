@@ -18,6 +18,8 @@ android {
     }
     productFlavors {
     }
+    compileOptions {
+    }
 }
 
 dependencies {
@@ -33,4 +35,8 @@ dependencies {
     compile 'com.squareup.retrofit2:adapter-rxjava:2.0.1'
     compile 'io.reactivex:rxjava:1.2.7'
     compile 'io.reactivex:rxandroid:1.2.1'
+    compile 'com.tbruyelle.rxpermissions:rxpermissions:0.9.3@aar'
+    compile 'com.github.rubensousa:previewseekbar:0.3'
+    compile 'com.google.android.exoplayer:exoplayer:r2.1.1'
+    compile project(':FFmpegAndroid')
 }

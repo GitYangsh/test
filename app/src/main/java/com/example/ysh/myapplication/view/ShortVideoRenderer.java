@@ -77,7 +77,9 @@ public class ShortVideoRenderer implements GLSurfaceView.Renderer, SurfaceTextur
             mSTexture.getTransformMatrix(mStMatrix);
         }
         // draw to preview screen
-        mDrawer.draw(hTex, mStMatrix);
+        if (mDrawer != null) {
+            mDrawer.draw(hTex, mStMatrix);
+        }
         flip = !flip;
         if (flip) {    // ~30fps
             synchronized (this) {
