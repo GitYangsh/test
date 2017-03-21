@@ -41,6 +41,7 @@
         <activity android:name=".activity.ShortVideoActivity"
                   android:screenOrientation="portrait"/>
         <activity android:name=".activity.PlayVideoActivity"/>
+        <activity android:name=".activity.CameraTextureViewActivity"/>
     </application>
 
 </manifest>

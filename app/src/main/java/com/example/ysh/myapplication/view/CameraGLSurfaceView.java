@@ -192,10 +192,10 @@ public class CameraGLSurfaceView extends GLSurfaceView implements GLSurfaceView.
 
     public class Square {
         private float shapeCoords[] = {
-                -1.0f, 1.0f, 0.0f,   // top left
-                -1.0f, -1.0f, 0.0f,   // bottom left
-                1.0f, -1.0f, 0.0f,   // bottom right
-                1.0f, 1.0f, 0.0f}; // top right
+                -1.0f, 0.6f, 0.0f,   // top left
+                -1.0f, -0.6f, 0.0f,   // bottom left
+                1.0f, -0.6f, 0.0f,   // bottom right
+                1.0f, 0.6f, 0.0f}; // top right
         //90 degree rotated
         private float textureCoords[] = {
                 0.0f, 1.0f,   // top left
